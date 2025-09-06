@@ -58,6 +58,7 @@
             color: white;
             background-color: #444;
             border: 1px solid #666;
+            width: 300px;
         }
         div {
             margin-bottom: 15px;
@@ -265,7 +266,14 @@
             });
 
             // Update hidden input with base64 signature data on form submit
-            document.querySelector('form').addEventListener('submit', () => {
+            document.querySelector('form').addEventListener('submit', (e) => {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                const isCanvasEmpty = imageData.every(val => val === 0);
+                if (isCanvasEmpty) {
+                    e.preventDefault();
+                    alert('Please provide a signature.');
+                    return;
+                }
                 const signatureData = canvas.toDataURL('image/png');
                 document.getElementById('signature-data').value = signatureData;
             });
@@ -304,7 +312,7 @@
             <div class="radio-buttons">
                 <input type="radio" id="tax_exempt_yes" name="tax_exempt" value="yes"> 
                 <label for="tax_exempt_yes">Yes</label>
-                <input type="radio" id="tax_exempt_no" name="tax_exempt" value="no" checked> 
+                <input type="radio" id="tax_exempt_no" name="tax_exempt" value="no"> 
                 <label for="tax_exempt_no">No</label>
             </div>
         </div>
@@ -317,7 +325,7 @@
             <div class="radio-buttons">
                 <input type="radio" id="payment_terms_yes" name="payment_terms" value="yes"> 
                 <label for="payment_terms_yes">Yes</label>
-                <input type="radio" id="payment_terms_no" name="payment_terms" value="no" checked> 
+                <input type="radio" id="payment_terms_no" name="payment_terms" value="no"> 
                 <label for="payment_terms_no">No</label>
             </div>
         </div>
@@ -343,7 +351,7 @@
             <div class="radio-buttons">
                 <input type="radio" id="gpo_yes" name="gpo" value="yes" onclick="showGpoOptions()"> 
                 <label for="gpo_yes">Yes</label>
-                <input type="radio" id="gpo_no" name="gpo" value="no" onclick="hideGpoOptions()" checked> 
+                <input type="radio" id="gpo_no" name="gpo" value="no" onclick="hideGpoOptions()"> 
                 <label for="gpo_no">No</label>
             </div>
         </div>
@@ -362,7 +370,7 @@
             <div class="radio-buttons">
                 <input type="radio" id="distributor_yes" name="distributor" value="yes" onclick="showDistOptions()"> 
                 <label for="distributor_yes">Yes</label>
-                <input type="radio" id="distributor_no" name="distributor" value="no" onclick="hideDistOptions()" checked> 
+                <input type="radio" id="distributor_no" name="distributor" value="no" onclick="hideDistOptions()"> 
                 <label for="distributor_no">No</label>
             </div>
         </div>
@@ -400,7 +408,7 @@
             <div class="radio-buttons">
                 <input type="radio" id="single_billing_yes" name="single_billing" value="yes"> 
                 <label for="single_billing_yes">Yes</label>
-                <input type="radio" id="single_billing_no" name="single_billing" value="no" checked> 
+                <input type="radio" id="single_billing_no" name="single_billing" value="no"> 
                 <label for="single_billing_no">No</label>
             </div>
         </div>
@@ -410,7 +418,7 @@
             <div class="radio-buttons">
                 <input type="radio" id="single_delivery_yes" name="single_delivery" value="yes"> 
                 <label for="single_delivery_yes">Yes</label>
-                <input type="radio" id="single_delivery_no" name="single_delivery" value="no" checked> 
+                <input type="radio" id="single_delivery_no" name="single_delivery" value="no"> 
                 <label for="single_delivery_no">No</label>
             </div>
         </div>
@@ -474,9 +482,11 @@
                     </div>
                 </div>
 
-                <div>
-                    <label for="delivery_hours[0]">Delivery Hours and Days:</label><br>
-                    <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" aria-label="Delivery Hours and Days">
+                <div class="dropdown-group">
+                    <label for="delivery_hours[0]">Delivery Hours and Days:</label>
+                    <div class="dropdown-field">
+                        <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" aria-label="Delivery Hours and Days">
+                    </div>
                 </div>
 
                 <div class="radio-group">
@@ -484,7 +494,7 @@
                     <div class="radio-buttons">
                         <input type="radio" id="liftgate_yes[0]" name="liftgate[0]" value="yes"> 
                         <label for="liftgate_yes[0]">Yes</label>
-                        <input type="radio" id="liftgate_no[0]" name="liftgate[0]" value="no" checked> 
+                        <input type="radio" id="liftgate_no[0]" name="liftgate[0]" value="no"> 
                         <label for="liftgate_no[0]">No</label>
                     </div>
                 </div>
@@ -494,7 +504,7 @@
                     <div class="radio-buttons">
                         <input type="radio" id="appt_yes[0]" name="appt[0]" value="yes"> 
                         <label for="appt_yes[0]">Yes</label>
-                        <input type="radio" id="appt_no[0]" name="appt[0]" value="no" checked> 
+                        <input type="radio" id="appt_no[0]" name="appt[0]" value="no"> 
                         <label for="appt_no[0]">No</label>
                     </div>
                 </div>
@@ -509,7 +519,7 @@
         </div>
 
         <div id="signature-section">
-            <label for="signature-pad">Signature (Optional):</label><br>
+            <label for="signature-pad">Signature (Required):</label><br>
             <canvas id="signature-pad" width="400" height="150" aria-label="Signature Pad"></canvas>
             <input type="hidden" id="signature-data" name="signature" value="">
             <button type="button" id="clear-signature">Clear Signature</button>
