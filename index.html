@@ -42,6 +42,9 @@
         #customer_name {
             max-width: 400px;
             width: 100%;
+            color: white;
+            background-color: #444;
+            border: 1px solid #666;
         }
         #notes {
             max-width: 500px;
@@ -189,6 +192,8 @@
         window.onload = function() {
             const canvas = document.getElementById('signature-pad');
             const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#ffffff'; // Ensure signature lines are white
+            ctx.lineWidth = 2;
             let isDrawing = false;
             let lastX = 0;
             let lastY = 0;
