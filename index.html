@@ -54,11 +54,22 @@
             background-color: #444;
             border: 1px solid #666;
         }
-        #dist_location, input[name^="delivery_hours"] {
+        #dist_location {
             color: white;
             background-color: #444;
             border: 1px solid #666;
-            width: 300px;
+        }
+        input[name^="delivery_hours"] {
+            color: white;
+            background-color: #444;
+            border: 1px solid #666;
+            width: 250px;
+        }
+        input[name="other_pricing"] {
+            color: white;
+            background-color: #444;
+            border: 1px solid #666;
+            max-width: 250px;
         }
         div {
             margin-bottom: 15px;
@@ -96,9 +107,8 @@
         #signature-pad {
             border: 1px solid #666;
             background-color: #222;
-            width: 400px;
+            width: 500px;
             height: 150px;
-            margin: 0 auto;
             display: block;
         }
         #signature-section {
@@ -145,7 +155,7 @@
             removeBtn.onclick = function() { removeLocation(this); };
             newLoc.appendChild(removeBtn);
             
-            // Update input names and clear values
+            // Update input names, clear values, and ensure correct label/placeholder
             var inputs = newLoc.querySelectorAll('input');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].name) {
@@ -154,7 +164,18 @@
                     if (inputs[i].type === 'radio') {
                         inputs[i].checked = false;
                     }
+                    if (inputs[i].name.startsWith('delivery_hours')) {
+                        inputs[i].id = 'delivery_hours[' + count + ']';
+                        inputs[i].setAttribute('aria-label', 'Dock Availability');
+                        inputs[i].placeholder = 'Hours & Days';
+                    }
                 }
+            }
+            // Update label for Dock Availability
+            var label = newLoc.querySelector('label[for^="delivery_hours"]');
+            if (label) {
+                label.textContent = 'Dock Availability:';
+                label.setAttribute('for', 'delivery_hours[' + count + ']');
             }
             
             locations.appendChild(newLoc);
@@ -177,6 +198,16 @@
                     if (inputs[j].name) {
                         inputs[j].name = inputs[j].name.replace(/\[\d+\]/, '[' + i + ']');
                     }
+                    if (inputs[j].name.startsWith('delivery_hours')) {
+                        inputs[j].id = 'delivery_hours[' + i + ']';
+                        inputs[j].setAttribute('aria-label', 'Dock Availability');
+                        inputs[j].placeholder = 'Hours & Days';
+                    }
+                }
+                var label = locations[i].querySelector('label[for^="delivery_hours"]');
+                if (label) {
+                    label.setAttribute('for', 'delivery_hours[' + i + ']');
+                    label.textContent = 'Dock Availability:';
                 }
             }
         }
@@ -483,9 +514,9 @@
                 </div>
 
                 <div class="dropdown-group">
-                    <label for="delivery_hours[0]">Delivery Hours and Days:</label>
+                    <label for="delivery_hours[0]">Dock Availability:</label>
                     <div class="dropdown-field">
-                        <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" aria-label="Delivery Hours and Days">
+                        <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" placeholder="Hours & Days" aria-label="Dock Availability">
                     </div>
                 </div>
 
@@ -520,7 +551,7 @@
 
         <div id="signature-section">
             <label for="signature-pad">Signature (Required):</label><br>
-            <canvas id="signature-pad" width="400" height="150" aria-label="Signature Pad"></canvas>
+            <canvas id="signature-pad" width="500" height="150" aria-label="Signature Pad"></canvas>
             <input type="hidden" id="signature-data" name="signature" value="">
             <button type="button" id="clear-signature">Clear Signature</button>
         </div>
