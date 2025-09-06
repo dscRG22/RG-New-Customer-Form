@@ -117,6 +117,17 @@
         .radio-buttons input {
             margin-right: 5px;
         }
+        .dropdown-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .dropdown-field {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
     </style>
     <script>
         function addLocation() {
@@ -314,15 +325,17 @@
             Please provide a credit reference form to ar@rgcoffee.com
         </div>
 
-        <div>
-            <label for="rep">Who is the rep?</label><br>
-            <select id="rep" name="rep" aria-label="Sales Representative">
-                <option>Kris</option>
-                <option>Tia</option>
-                <option>Leann</option>
-                <option>Kelly</option>
-                <option>Kelli</option>
-            </select>
+        <div class="dropdown-group">
+            <label for="rep">Who is the rep?</label>
+            <div class="dropdown-field">
+                <select id="rep" name="rep" aria-label="Sales Representative">
+                    <option>Kris</option>
+                    <option>Tia</option>
+                    <option>Leann</option>
+                    <option>Kelly</option>
+                    <option>Kelli</option>
+                </select>
+            </div>
         </div>
 
         <div class="radio-group">
@@ -364,20 +377,22 @@
             <input type="text" id="dist_location" name="dist_location" maxlength="50" placeholder="Distributor Location Name or Number" aria-label="Distributor Location">
         </div>
 
-        <div>
-            <label for="pricing">What pricing structure is this customer?</label><br>
-            <select id="pricing" name="pricing" onchange="checkOther(this)" aria-label="Pricing Structure">
-                <option>Frontline</option>
-                <option>GPO</option>
-                <option>WS</option>
-                <option>Coffee Shop</option>
-                <option>Sussex</option>
-                <option>Sodexo</option>
-                <option>other</option>
-            </select>
-            <div id="other_pricing" style="display:none;">
-                <input type="text" name="other_pricing" maxlength="20" aria-label="Custom Pricing Structure">
+        <div class="dropdown-group">
+            <label for="pricing">What pricing structure is this customer?</label>
+            <div class="dropdown-field">
+                <select id="pricing" name="pricing" onchange="checkOther(this)" aria-label="Pricing Structure">
+                    <option>Frontline</option>
+                    <option>GPO</option>
+                    <option>WS</option>
+                    <option>Coffee Shop</option>
+                    <option>Sussex</option>
+                    <option>Sodexo</option>
+                    <option>other</option>
+                </select>
             </div>
+        </div>
+        <div id="other_pricing" style="display:none;">
+            <input type="text" name="other_pricing" maxlength="20" aria-label="Custom Pricing Structure">
         </div>
 
         <div class="radio-group">
@@ -448,6 +463,18 @@
                 </div>
 
                 <div>
+                    <label>Warehouse and/or Receiving Contact:</label>
+                    <div class="row">
+                        <input type="text" name="warehouse_first[0]" placeholder="First Name" aria-label="Warehouse Contact First Name">
+                        <input type="text" name="warehouse_last[0]" placeholder="Last Name" aria-label="Warehouse Contact Last Name">
+                    </div>
+                    <div class="row">
+                        <input type="email" name="warehouse_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" aria-label="Warehouse Contact Email">
+                        <input type="tel" name="warehouse_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Warehouse Contact Phone">
+                    </div>
+                </div>
+
+                <div>
                     <label for="delivery_hours[0]">Delivery Hours and Days:</label><br>
                     <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" aria-label="Delivery Hours and Days">
                 </div>
@@ -469,18 +496,6 @@
                         <label for="appt_yes[0]">Yes</label>
                         <input type="radio" id="appt_no[0]" name="appt[0]" value="no" checked> 
                         <label for="appt_no[0]">No</label>
-                    </div>
-                </div>
-
-                <div>
-                    <label>Warehouse and/or Receiving Contact:</label>
-                    <div class="row">
-                        <input type="text" name="warehouse_first[0]" placeholder="First Name" aria-label="Warehouse Contact First Name">
-                        <input type="text" name="warehouse_last[0]" placeholder="Last Name" aria-label="Warehouse Contact Last Name">
-                    </div>
-                    <div class="row">
-                        <input type="email" name="warehouse_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" aria-label="Warehouse Contact Email">
-                        <input type="tel" name="warehouse_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Warehouse Contact Phone">
                     </div>
                 </div>
             </div>
