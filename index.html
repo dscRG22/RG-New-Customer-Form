@@ -54,6 +54,11 @@
             background-color: #444;
             border: 1px solid #666;
         }
+        #dist_location, input[name^="delivery_hours"] {
+            color: white;
+            background-color: #444;
+            border: 1px solid #666;
+        }
         div {
             margin-bottom: 15px;
         }
@@ -253,6 +258,22 @@
                 const signatureData = canvas.toDataURL('image/png');
                 document.getElementById('signature-data').value = signatureData;
             });
+
+            // Tax exempt message toggle
+            document.getElementById('tax_exempt_yes').addEventListener('change', () => {
+                document.getElementById('tax_exempt_message').style.display = 'block';
+            });
+            document.getElementById('tax_exempt_no').addEventListener('change', () => {
+                document.getElementById('tax_exempt_message').style.display = 'none';
+            });
+
+            // Payment terms message toggle
+            document.getElementById('payment_terms_yes').addEventListener('change', () => {
+                document.getElementById('payment_terms_message').style.display = 'block';
+            });
+            document.getElementById('payment_terms_no').addEventListener('change', () => {
+                document.getElementById('payment_terms_message').style.display = 'none';
+            });
         };
     </script>
 </head>
@@ -276,6 +297,9 @@
                 <label for="tax_exempt_no">No</label>
             </div>
         </div>
+        <div id="tax_exempt_message" style="display:none; color:red;">
+            Please provide a tax-exemption form to ar@rgcoffee.com
+        </div>
 
         <div class="radio-group">
             <label>Payment Terms Requested:</label>
@@ -285,6 +309,9 @@
                 <input type="radio" id="payment_terms_no" name="payment_terms" value="no" checked> 
                 <label for="payment_terms_no">No</label>
             </div>
+        </div>
+        <div id="payment_terms_message" style="display:none; color:red;">
+            Please provide a credit reference form to ar@rgcoffee.com
         </div>
 
         <div>
@@ -334,7 +361,7 @@
                 <option>Food Buy</option>
                 <option>Performance Food Group</option>
             </select>
-            <input type="text" name="dist_location" maxlength="50" placeholder="Distributor Location Name or Number" aria-label="Distributor Location">
+            <input type="text" id="dist_location" name="dist_location" maxlength="50" placeholder="Distributor Location Name or Number" aria-label="Distributor Location">
         </div>
 
         <div>
