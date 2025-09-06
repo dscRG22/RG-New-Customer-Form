@@ -1,4 +1,3 @@
-# RG-New-Customer-Form
 <!DOCTYPE html>
 <html lang="en">
 <head>
