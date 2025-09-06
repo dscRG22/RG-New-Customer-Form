@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Customer Intake Form</title>
+    <style>
+        body {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        form {
+            background-color: #e6f3ff;
+            border: 2px solid #000;
+            padding: 20px;
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .row input {
+            flex: 1;
+            min-width: 150px;
+            max-width: 250px;
+            padding: 5px;
+        }
+        #customer_name {
+            max-width: 400px;
+            width: 100%;
+        }
+        #notes {
+            max-width: 500px;
+            width: 100%;
+            height: 100px;
+        }
+        div {
+            margin-bottom: 15px;
+        }
+        label, input, select, textarea {
+            display: inline-block;
+            text-align: center;
+        }
+        button {
+            margin: 15px auto;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #000;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #d0e4ff;
+        }
+        #locations {
+            text-align: center;
+        }
+        .location {
+            margin-bottom: 20px;
+        }
+        #tax_form, #credit_ref, #default_terms, #gpo_options, #dist_options, #other_pricing {
+            text-align: center;
+        }
+    </style>
+    <script>
+        function addLocation() {
+            var locations = document.getElementById('locations');
+            if (!locations.getElementsByClassName('location')[0]) return;
+            var count = locations.getElementsByClassName('location').length;
+            var newLoc = locations.getElementsByClassName('location')[0].cloneNode(true);
+            
+            // Update header and add remove button
+            newLoc.querySelector('h2').textContent = 'Location ' + count + ' Information';
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.textContent = 'Remove Location';
+            removeBtn.onclick = function() { removeLocation(this); };
+            newLoc.appendChild(removeBtn);
+            
+            // Update input names and clear values
+            var inputs = newLoc.querySelectorAll('input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].name) {
+                    inputs[i].name = inputs[i].name.replace(/\[\d+\]/, '[' + count + ']');
+                    inputs[i].value = '';
+                    if (inputs[i].type === 'radio') {
+                        inputs[i].checked = false;
+                    }
+                }
+            }
+            
+            locations.appendChild(newLoc);
+        }
+
+        function removeLocation(button) {
+            var locations = document.getElementById('locations');
+            if (locations.getElementsByClassName('location').length > 1) {
+                button.parentElement.remove();
+                updateLocationHeaders();
+            }
+        }
+
+        function updateLocationHeaders() {
+            var locations = document.getElementById('locations').getElementsByClassName('location');
+            for (var i = 0; i < locations.length; i++) {
+                locations[i].querySelector('h2').textContent = 'Location ' + (i === 0 ? 'Primary' : i) + ' Information';
+                var inputs = locations[i].querySelectorAll('input');
+                for (var j = 0; j < inputs.length; j++) {
+                    if (inputs[j].name) {
+                        inputs[j].name = inputs[j].name.replace(/\[\d+\]/, '[' + i + ']');
+                    }
+                }
+            }
+        }
+
+        function showTaxForm() {
+            document.getElementById('tax_form').style.display = 'block';
+        }
+
+        function hideTaxForm() {
+            document.getElementById('tax_form').style.display = 'none';
+        }
+
+        function showPaymentYes() {
+            document.getElementById('credit_ref').style.display = 'block';
+            document.getElementById('default_terms').style.display = 'none';
+        }
+
+        function showPaymentNo() {
+            document.getElementById('credit_ref').style.display = 'none';
+            document.getElementById('default_terms').style.display = 'block';
+        }
+
+        function showGpoOptions() {
+            document.getElementById('gpo_options').style.display = 'block';
+        }
+
+        function hideGpoOptions() {
+            document.getElementById('gpo_options').style.display = 'none';
+        }
+
+        function showDistOptions() {
+            document.getElementById('dist_options').style.display = 'block';
+        }
+
+        function hideDistOptions() {
+            document.getElementById('dist_options').style.display = 'none';
+        }
+
+        function checkOther(select) {
+            if (select.value === 'other') {
+                document.getElementById('other_pricing').style.display = 'block';
+            } else {
+                document.getElementById('other_pricing').style.display = 'none';
+            }
+        }
+    </script>
+</head>
+<body>
+    <form action="https://formspree.io/f/your-form-id" method="POST" enctype="multipart/form-data">
+        <h1>New Customer Intake Form</h1>
+
+        <div>
+            <label for="customer_name">Customer Name:</label><br>
+            <input type="text" id="customer_name" name="customer_name" required aria-label="Customer Name">
+        </div>
+
+        <div>
+            <label>Are you tax exempt?</label><br>
+            <input type="radio" id="tax_exempt_yes" name="tax_exempt" value="yes" onclick="showTaxForm()"> 
+            <label for="tax_exempt_yes">Yes</label>
+            <input type="radio" id="tax_exempt_no" name="tax_exempt" value="no" onclick="hideTaxForm()" checked> 
+            <label for="tax_exempt_no">No</label>
+            <div id="tax_form" style="display:none; color:red;">
+                <label for="tax_form_upload">Upload Tax-Exemption Form (Optional):</label>
+                <input type="file" id="tax_form_upload" name="tax_form_upload" accept=".pdf,.doc,.docx">
+            </div>
+        </div>
+
+        <div>
+            <label>Payment Terms Requested:</label><br>
+            <input type="radio" id="payment_terms_yes" name="payment_terms" value="yes" onclick="showPaymentYes()"> 
+            <label for="payment_terms_yes">Yes</label>
+            <input type="radio" id="payment_terms_no" name="payment_terms" value="no" onclick="showPaymentNo()" checked> 
+            <label for="payment_terms_no">No</label>
+            <div id="credit_ref" style="display:none; color:red;">
+                <label for="credit_ref_upload">Upload Credit Reference Form (Optional):</label>
+                <input type="file" id="credit_ref_upload" name="credit_ref_upload" accept=".pdf,.doc,.docx">
+            </div>
+            <div id="default_terms" style="display:block; color:red;">
+                Due on Receipt are default terms. If you would like terms please request.
+            </div>
+        </div>
+
+        <div>
+            <label for="rep">Who is the rep?</label><br>
+            <select id="rep" name="rep" aria-label="Sales Representative">
+                <option>Kris</option>
+                <option>Tia</option>
+                <option>Leann</option>
+                <option>Kelly</option>
+                <option>Kelli</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Are you a member of a GPO?</label><br>
+            <input type="radio" id="gpo_yes" name="gpo" value="yes" onclick="showGpoOptions()"> 
+            <label for="gpo_yes">Yes</label>
+            <input type="radio" id="gpo_no" name="gpo" value="no" onclick="hideGpoOptions()" checked> 
+            <label for="gpo_no">No</label>
+            <div id="gpo_options" style="display:none;">
+                <select name="gpo_type" aria-label="GPO Type">
+                    <option>Premier</option>
+                    <option>Vizient</option>
+                    <option>VA</option>
+                    <option>Forum</option>
+                    <option>Sodexo</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <label>Will you purchase from a distributor?</label><br>
+            <input type="radio" id="distributor_yes" name="distributor" value="yes" onclick="showDistOptions()"> 
+            <label for="distributor_yes">Yes</label>
+            <input type="radio" id="distributor_no" name="distributor" value="no" onclick="hideDistOptions()" checked> 
+            <label for="distributor_no">No</label>
+            <div id="dist_options" style="display:none;">
+                <select name="dist_type" aria-label="Distributor Type">
+                    <option>US Foods</option>
+                    <option>Sysco</option>
+                    <option>GFS</option>
+                    <option>Food Buy</option>
+                    <option>Performance Food Group</option>
+                </select>
+                <input type="text" name="dist_location" maxlength="50" placeholder="Distributor Location Name or Number" aria-label="Distributor Location">
+            </div>
+        </div>
+
+        <div>
+            <label for="pricing">What pricing structure is this customer?</label><br>
+            <select id="pricing" name="pricing" onchange="checkOther(this)" aria-label="Pricing Structure">
+                <option>Frontline</option>
+                <option>GPO</option>
+                <option>WS</option>
+                <option>Coffee Shop</option>
+                <option>Sussex</option>
+                <option>Sodexo</option>
+                <option>other</option>
+            </select>
+            <div id="other_pricing" style="display:none;">
+                <input type="text" name="other_pricing" maxlength="20" aria-label="Custom Pricing Structure">
+            </div>
+        </div>
+
+        <div>
+            <label>Do you have a single billing point of contact?</label><br>
+            <input type="radio" id="single_billing_yes" name="single_billing" value="yes"> 
+            <label for="single_billing_yes">Yes</label>
+            <input type="radio" id="single_billing_no" name="single_billing" value="no" checked> 
+            <label for="single_billing_no">No</label>
+        </div>
+
+        <div>
+            <label>Do you have a single delivery address?</label><br>
+            <input type="radio" id="single_delivery_yes" name="single_delivery" value="yes"> 
+            <label for="single_delivery_yes">Yes</label>
+            <input type="radio" id="single_delivery_no" name="single_delivery" value="no" checked> 
+            <label for="single_delivery_no">No</label>
+        </div>
+
+        <div id="locations">
+            <div class="location">
+                <h2>Primary Information</h2>
+                <div>
+                    <label>Purchasing Contact:</label>
+                    <div class="row">
+                        <input type="text" name="purchasing_first[0]" placeholder="First Name" required aria-label="Purchasing Contact First Name">
+                        <input type="text" name="purchasing_last[0]" placeholder="Last Name" required aria-label="Purchasing Contact Last Name">
+                    </div>
+                    <div class="row">
+                        <input type="email" name="purchasing_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required aria-label="Purchasing Contact Email">
+                        <input type="tel" name="purchasing_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Purchasing Contact Phone">
+                    </div>
+                </div>
+
+                <div>
+                    <label>Billing Address:</label>
+                    <div class="row">
+                        <input type="text" name="billing_street[0]" placeholder="Street" required aria-label="Billing Street">
+                        <input type="text" name="billing_city[0]" placeholder="City" required aria-label="Billing City">
+                        <input type="text" name="billing_state[0]" placeholder="State" required aria-label="Billing State">
+                        <input type="text" name="billing_zip[0]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" required aria-label="Billing Zip Code">
+                    </div>
+                </div>
+
+                <div>
+                    <label>Accounts Payable Contact:</label>
+                    <div class="row">
+                        <input type="text" name="ap_first[0]" placeholder="First Name" aria-label="Accounts Payable First Name">
+                        <input type="text" name="ap_last[0]" placeholder="Last Name" aria-label="Accounts Payable Last Name">
+                    </div>
+                    <div class="row">
+                        <input type="email" name="ap_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" aria-label="Accounts Payable Email">
+                        <input type="tel" name="ap_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Accounts Payable Phone">
+                    </div>
+                </div>
+
+                <div>
+                    <label>Ship to Address:</label>
+                    <div class="row">
+                        <input type="text" name="ship_street[0]" placeholder="Street" required aria-label="Shipping Street">
+                        <input type="text" name="ship_city[0]" placeholder="City" required aria-label="Shipping City">
+                        <input type="text" name="ship_state[0]" placeholder="State" required aria-label="Shipping State">
+                        <input type="text" name="ship_zip[0]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" required aria-label="Shipping Zip Code">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="delivery_hours[0]">Delivery Hours and Days:</label><br>
+                    <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" aria-label="Delivery Hours and Days">
+                </div>
+
+                <div>
+                    <label>Liftgate Required?</label><br>
+                    <input type="radio" id="liftgate_yes[0]" name="liftgate[0]" value="yes"> 
+                    <label for="liftgate_yes[0]">Yes</label>
+                    <input type="radio" id="liftgate_no[0]" name="liftgate[0]" value="no" checked> 
+                    <label for="liftgate_no[0]">No</label>
+                </div>
+
+                <div>
+                    <label>Delivery Appointment Required?</label><br>
+                    <input type="radio" id="appt_yes[0]" name="appt[0]" value="yes"> 
+                    <label for="appt_yes[0]">Yes</label>
+                    <input type="radio" id="appt_no[0]" name="appt[0]" value="no" checked> 
+                    <label for="appt_no[0]">No</label>
+                </div>
+
+                <div>
+                    <label>Warehouse and/or Receiving Contact:</label>
+                    <div class="row">
+                        <input type="text" name="warehouse_first[0]" placeholder="First Name" aria-label="Warehouse Contact First Name">
+                        <input type="text" name="warehouse_last[0]" placeholder="Last Name" aria-label="Warehouse Contact Last Name">
+                    </div>
+                    <div class="row">
+                        <input type="email" name="warehouse_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" aria-label="Warehouse Contact Email">
+                        <input type="tel" name="warehouse_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Warehouse Contact Phone">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" onclick="addLocation()">Add More Locations</button>
+
+        <div>
+            <label for="notes">Special Account Notes:</label><br>
+            <textarea id="notes" name="notes" maxlength="200" aria-label="Special Account Notes"></textarea>
+        </div>
+
+        <div>
+            <label for="w9_upload">Please provide a W-9 Form (Optional):</label><br>
+            <input type="file" id="w9_upload" name="w9_upload" accept=".pdf,.doc,.docx">
+        </div>
+
+        <button type="submit">Submit Form</button>
+    </form>
+</body>
+</html>
