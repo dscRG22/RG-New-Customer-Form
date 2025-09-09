@@ -17,7 +17,7 @@
         form {
             background-color: #333;
             padding: 20px;
-            margin: 50px; /* Added 50px margin for embossed effect */
+            margin: 50px;
             max-width: 1000px;
             width: 100%;
             text-align: center;
@@ -136,6 +136,11 @@
             height: 150px;
             display: block;
         }
+        @media (max-width: 600px) {
+            #signature-pad {
+                width: 300px;
+            }
+        }
         #signature-section {
             margin-top: 20px;
         }
@@ -173,13 +178,13 @@
         }
         .w9-message {
             font-weight: bold;
-            color: #00FFFF; /* Cyan */
+            color: #00FFFF;
             margin-top: 5px;
             font-size: 16px;
             font-style: italic;
         }
         .tax-exempt-message, .payment-terms-message {
-            color: #00FFFF; /* Cyan */
+            color: #00FFFF;
         }
         .logo-container {
             margin-bottom: 10px;
@@ -195,8 +200,27 @@
         #multi_location_message {
             color: green;
         }
+        .accounts-payable {
+            display: block;
+        }
+        .accounts-payable.hidden {
+            display: none;
+        }
     </style>
     <script>
+        function updateAccountsPayableVisibility() {
+            const multiLocationYes = document.getElementById('multi_location_yes').checked;
+            const rgSetupYes = document.getElementById('rg_setup_yes') && document.getElementById('rg_setup_yes').checked;
+            const billingCentralized = document.getElementById('billing_centralized') && document.getElementById('billing_centralized').checked;
+            const apSections = document.querySelectorAll('.accounts-payable');
+            
+            if (multiLocationYes && rgSetupYes && billingCentralized) {
+                apSections.forEach(section => section.classList.add('hidden'));
+            } else {
+                apSections.forEach(section => section.classList.remove('hidden'));
+            }
+        }
+
         function addLocation() {
             var locations = document.getElementById('locations');
             var count = locations.getElementsByClassName('location').length;
@@ -303,6 +327,7 @@
             newLoc.appendChild(removeBtn);
             
             locations.appendChild(newLoc);
+            updateAccountsPayableVisibility();
         }
 
         function removeLocation(button) {
@@ -310,6 +335,7 @@
             if (locations.getElementsByClassName('location').length > 1) {
                 button.parentElement.remove();
                 updateLocationHeaders();
+                updateAccountsPayableVisibility();
             }
         }
 
@@ -341,6 +367,7 @@
                     label.textContent = 'Dock Availability:';
                 }
             }
+            updateAccountsPayableVisibility();
         }
 
         function showGpoOptions() {
@@ -371,6 +398,7 @@
             document.getElementById('network_setup').style.display = 'block';
             document.getElementById('multi_location_message').style.display = 'block';
             updateSingleBillingVisibility();
+            updateAccountsPayableVisibility();
         }
 
         function hideNetworkSetup() {
@@ -378,32 +406,38 @@
             document.getElementById('multi_location_message').style.display = 'none';
             hideBillingType();
             updateSingleBillingVisibility();
+            updateAccountsPayableVisibility();
         }
 
         function showBillingType() {
             document.getElementById('billing_type').style.display = 'block';
             updateSingleBillingVisibility();
+            updateAccountsPayableVisibility();
         }
 
         function hideBillingType() {
             document.getElementById('billing_type').style.display = 'none';
             hideBillingMessages();
             updateSingleBillingVisibility();
+            updateAccountsPayableVisibility();
         }
 
         function showLocalizedMessage() {
             document.getElementById('localized_message').style.display = 'block';
             document.getElementById('centralized_message').style.display = 'none';
+            updateAccountsPayableVisibility();
         }
 
         function showCentralizedMessage() {
             document.getElementById('centralized_message').style.display = 'block';
             document.getElementById('localized_message').style.display = 'none';
+            updateAccountsPayableVisibility();
         }
 
         function hideBillingMessages() {
             document.getElementById('localized_message').style.display = 'none';
             document.getElementById('centralized_message').style.display = 'none';
+            updateAccountsPayableVisibility();
         }
 
         function updateSingleBillingVisibility() {
@@ -416,6 +450,7 @@
                 singleBillingDiv.style.display = 'none';
                 document.getElementById('single_billing_message').style.display = 'none';
             }
+            updateAccountsPayableVisibility();
         }
 
         function showSingleBillingMessage() {
@@ -424,6 +459,7 @@
             } else {
                 document.getElementById('single_billing_message').style.display = 'none';
             }
+            updateAccountsPayableVisibility();
         }
 
         window.onload = function() {
@@ -528,10 +564,28 @@
             document.getElementById('multi_location_yes').addEventListener('change', showNetworkSetup);
             document.getElementById('multi_location_no').addEventListener('change', hideNetworkSetup);
             if (document.getElementById('rg_setup_yes')) {
-                document.getElementById('rg_setup_yes').addEventListener('change', showBillingType);
+                document.getElementById('rg_setup_yes').addEventListener('change', () => {
+                    showBillingType();
+                    updateAccountsPayableVisibility();
+                });
             }
             if (document.getElementById('rg_setup_no')) {
-                document.getElementById('rg_setup_no').addEventListener('change', hideBillingType);
+                document.getElementById('rg_setup_no').addEventListener('change', () => {
+                    hideBillingType();
+                    updateAccountsPayableVisibility();
+                });
+            }
+            if (document.getElementById('billing_centralized')) {
+                document.getElementById('billing_centralized').addEventListener('change', () => {
+                    showCentralizedMessage();
+                    updateAccountsPayableVisibility();
+                });
+            }
+            if (document.getElementById('billing_localized')) {
+                document.getElementById('billing_localized').addEventListener('change', () => {
+                    showLocalizedMessage();
+                    updateAccountsPayableVisibility();
+                });
             }
             document.getElementById('single_billing_yes').addEventListener('change', showSingleBillingMessage);
             document.getElementById('single_billing_no').addEventListener('change', showSingleBillingMessage);
@@ -540,6 +594,7 @@
             document.getElementById('clear-form').addEventListener('click', clearForm);
 
             loadForm();
+            updateAccountsPayableVisibility();
         };
 
         function saveForm() {
@@ -610,6 +665,7 @@
                     ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
                 };
             }
+            updateAccountsPayableVisibility();
         }
 
         function clearForm() {
@@ -633,6 +689,7 @@
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
             ctx.strokeStyle = '#ffffff';
             alert('Form cleared!');
+            updateAccountsPayableVisibility();
         }
     </script>
 </head>
@@ -731,7 +788,7 @@
                 <option>Food Buy</option>
                 <option>Performance Food Group</option>
             </select>
-            <input type="text" id="dist_location" name="dist_location" maxlength="50" placeholder="Dist. Location Name" aria-label="Distributor Location">
+            <input type="text" id="dist_location" name="dist_location" maxlength="50" placeholder="Distributor Location Name or Number" aria-label="Distributor Location">
         </div>
 
         <div class="dropdown-group">
@@ -831,7 +888,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div class="accounts-payable">
                     <label>Accounts Payable Contact:</label>
                     <div class="row">
                         <input type="text" name="ap_first[0]" placeholder="First Name" required aria-label="Accounts Payable First Name">
@@ -895,7 +952,7 @@
         </div>
 
         <button type="button" onclick="addLocation()">Add More Locations</button>
-        <br>
+
         <div>
             <label for="notes">Special Account Notes:</label><br>
             <textarea id="notes" name="notes" maxlength="200" aria-label="Special Account Notes"></textarea>
