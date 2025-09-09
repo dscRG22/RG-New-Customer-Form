@@ -114,6 +114,11 @@
         #signature-section {
             margin-top: 20px;
         }
+        .signature-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         .radio-group {
             display: flex;
             align-items: center;
@@ -139,6 +144,12 @@
             gap: 5px;
             margin-left: 10px;
         }
+        .w9-message {
+            font-weight: bold;
+            color: white;
+            margin-top: 5px;
+            font-size: 16px;
+        }
     </style>
     <script>
         function addLocation() {
@@ -155,7 +166,7 @@
             removeBtn.onclick = function() { removeLocation(this); };
             newLoc.appendChild(removeBtn);
             
-            // Update input names, clear values, and ensure correct label/placeholder
+            // Update input names, clear values, ensure correct label/placeholder, and set required
             var inputs = newLoc.querySelectorAll('input');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].name) {
@@ -168,6 +179,10 @@
                         inputs[i].id = 'delivery_hours[' + count + ']';
                         inputs[i].setAttribute('aria-label', 'Dock Availability');
                         inputs[i].placeholder = 'Hours & Days';
+                    }
+                    // Ensure required fields in cloned locations
+                    if (inputs[i].name.match(/^(warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
+                        inputs[i].setAttribute('required', 'required');
                     }
                 }
             }
@@ -202,6 +217,10 @@
                         inputs[j].id = 'delivery_hours[' + i + ']';
                         inputs[j].setAttribute('aria-label', 'Dock Availability');
                         inputs[j].placeholder = 'Hours & Days';
+                    }
+                    // Ensure required fields in updated locations
+                    if (inputs[j].name.match(/^(warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
+                        inputs[j].setAttribute('required', 'required');
                     }
                 }
                 var label = locations[i].querySelector('label[for^="delivery_hours"]');
@@ -240,7 +259,7 @@
         window.onload = function() {
             const canvas = document.getElementById('signature-pad');
             const ctx = canvas.getContext('2d');
-            ctx.strokeStyle = '#ffffff'; // Ensure signature lines are white
+            ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
             let isDrawing = false;
             let lastX = 0;
@@ -320,9 +339,11 @@
             // Payment terms message toggle
             document.getElementById('payment_terms_yes').addEventListener('change', () => {
                 document.getElementById('payment_terms_message').style.display = 'block';
+                document.getElementById('payment_terms_no_message').style.display = 'none';
             });
             document.getElementById('payment_terms_no').addEventListener('change', () => {
                 document.getElementById('payment_terms_message').style.display = 'none';
+                document.getElementById('payment_terms_no_message').style.display = 'block';
             });
         };
     </script>
@@ -336,38 +357,44 @@
         <div>
             <label for="customer_name">Customer Name:</label><br>
             <input type="text" id="customer_name" name="customer_name" required aria-label="Customer Name">
+            <br>
+            <h6 class="w9-message">Please provide an up to date W-9</h6>
         </div>
 
         <div class="radio-group">
             <label>Are you tax exempt?</label>
             <div class="radio-buttons">
-                <input type="radio" id="tax_exempt_yes" name="tax_exempt" value="yes"> 
+                <input type="radio" id="tax_exempt_yes" name="tax_exempt" value="yes" required> 
                 <label for="tax_exempt_yes">Yes</label>
                 <input type="radio" id="tax_exempt_no" name="tax_exempt" value="no"> 
                 <label for="tax_exempt_no">No</label>
             </div>
         </div>
         <div id="tax_exempt_message" style="display:none; color:red;">
-            Please provide a tax-exemption form to ar@rgcoffee.com
+            Please provide a tax-exemption form to your rep
         </div>
 
         <div class="radio-group">
             <label>Payment Terms Requested:</label>
             <div class="radio-buttons">
-                <input type="radio" id="payment_terms_yes" name="payment_terms" value="yes"> 
+                <input type="radio" id="payment_terms_yes" name="payment_terms" value="yes" required> 
                 <label for="payment_terms_yes">Yes</label>
                 <input type="radio" id="payment_terms_no" name="payment_terms" value="no"> 
                 <label for="payment_terms_no">No</label>
             </div>
         </div>
         <div id="payment_terms_message" style="display:none; color:red;">
-            Please provide a credit reference form to ar@rgcoffee.com
+            Please provide a credit reference form to your rep
+        </div>
+        <div id="payment_terms_no_message" style="display:none; color:red;">
+            By default customers are set up with Due On Receipt and can pay with check, card, or ACH link prior to or upon delivery
         </div>
 
         <div class="dropdown-group">
             <label for="rep">Who is the rep?</label>
             <div class="dropdown-field">
-                <select id="rep" name="rep" aria-label="Sales Representative">
+                <select id="rep" name="rep" required aria-label="Sales Representative">
+                    <option value="">Select a rep</option>
                     <option>Kris</option>
                     <option>Tia</option>
                     <option>Leann</option>
@@ -380,7 +407,7 @@
         <div class="radio-group">
             <label>Are you a member of a GPO?</label>
             <div class="radio-buttons">
-                <input type="radio" id="gpo_yes" name="gpo" value="yes" onclick="showGpoOptions()"> 
+                <input type="radio" id="gpo_yes" name="gpo" value="yes" required onclick="showGpoOptions()"> 
                 <label for="gpo_yes">Yes</label>
                 <input type="radio" id="gpo_no" name="gpo" value="no" onclick="hideGpoOptions()"> 
                 <label for="gpo_no">No</label>
@@ -399,7 +426,7 @@
         <div class="radio-group">
             <label>Will you purchase from a distributor?</label>
             <div class="radio-buttons">
-                <input type="radio" id="distributor_yes" name="distributor" value="yes" onclick="showDistOptions()"> 
+                <input type="radio" id="distributor_yes" name="distributor" value="yes" required onclick="showDistOptions()"> 
                 <label for="distributor_yes">Yes</label>
                 <input type="radio" id="distributor_no" name="distributor" value="no" onclick="hideDistOptions()"> 
                 <label for="distributor_no">No</label>
@@ -437,7 +464,7 @@
         <div class="radio-group">
             <label>Do you have a single billing point of contact?</label>
             <div class="radio-buttons">
-                <input type="radio" id="single_billing_yes" name="single_billing" value="yes"> 
+                <input type="radio" id="single_billing_yes" name="single_billing" value="yes" required> 
                 <label for="single_billing_yes">Yes</label>
                 <input type="radio" id="single_billing_no" name="single_billing" value="no"> 
                 <label for="single_billing_no">No</label>
@@ -447,7 +474,7 @@
         <div class="radio-group">
             <label>Do you have a single delivery address?</label>
             <div class="radio-buttons">
-                <input type="radio" id="single_delivery_yes" name="single_delivery" value="yes"> 
+                <input type="radio" id="single_delivery_yes" name="single_delivery" value="yes" required> 
                 <label for="single_delivery_yes">Yes</label>
                 <input type="radio" id="single_delivery_no" name="single_delivery" value="no"> 
                 <label for="single_delivery_no">No</label>
@@ -465,7 +492,7 @@
                     </div>
                     <div class="row">
                         <input type="email" name="purchasing_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required aria-label="Purchasing Contact Email">
-                        <input type="tel" name="purchasing_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Purchasing Contact Phone">
+                        <input type="tel" name="purchasing_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Purchasing Contact Phone">
                     </div>
                 </div>
 
@@ -482,12 +509,12 @@
                 <div>
                     <label>Accounts Payable Contact:</label>
                     <div class="row">
-                        <input type="text" name="ap_first[0]" placeholder="First Name" aria-label="Accounts Payable First Name">
-                        <input type="text" name="ap_last[0]" placeholder="Last Name" aria-label="Accounts Payable Last Name">
+                        <input type="text" name="ap_first[0]" placeholder="First Name" required aria-label="Accounts Payable First Name">
+                        <input type="text" name="ap_last[0]" placeholder="Last Name" required aria-label="Accounts Payable Last Name">
                     </div>
                     <div class="row">
-                        <input type="email" name="ap_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" aria-label="Accounts Payable Email">
-                        <input type="tel" name="ap_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Accounts Payable Phone">
+                        <input type="email" name="ap_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required aria-label="Accounts Payable Email">
+                        <input type="tel" name="ap_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Accounts Payable Phone">
                     </div>
                 </div>
 
@@ -504,12 +531,12 @@
                 <div>
                     <label>Warehouse and/or Receiving Contact:</label>
                     <div class="row">
-                        <input type="text" name="warehouse_first[0]" placeholder="First Name" aria-label="Warehouse Contact First Name">
-                        <input type="text" name="warehouse_last[0]" placeholder="Last Name" aria-label="Warehouse Contact Last Name">
+                        <input type="text" name="warehouse_first[0]" placeholder="First Name" required aria-label="Warehouse Contact First Name">
+                        <input type="text" name="warehouse_last[0]" placeholder="Last Name" required aria-label="Warehouse Contact Last Name">
                     </div>
                     <div class="row">
-                        <input type="email" name="warehouse_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" aria-label="Warehouse Contact Email">
-                        <input type="tel" name="warehouse_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Warehouse Contact Phone">
+                        <input type="email" name="warehouse_email[0]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required aria-label="Warehouse Contact Email">
+                        <input type="tel" name="warehouse_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Warehouse Contact Phone">
                     </div>
                 </div>
 
@@ -550,10 +577,12 @@
         </div>
 
         <div id="signature-section">
-            <label for="signature-pad">Signature (Required):</label><br>
-            <canvas id="signature-pad" width="500" height="150" aria-label="Signature Pad"></canvas>
-            <input type="hidden" id="signature-data" name="signature" value="">
-            <button type="button" id="clear-signature">Clear Signature</button>
+            <div class="signature-container">
+                <label for="signature-pad">Signature (Required):</label>
+                <canvas id="signature-pad" width="500" height="150" aria-label="Signature Pad"></canvas>
+                <input type="hidden" id="signature-data" name="signature" value="">
+                <button type="button" id="clear-signature">Clear Signature</button>
+            </div>
         </div>
 
         <button type="submit">Submit Form</button>
