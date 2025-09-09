@@ -17,6 +17,7 @@
         form {
             background-color: #333;
             padding: 20px;
+            margin: 50px; /* Added 50px margin for embossed effect */
             max-width: 1000px;
             width: 100%;
             text-align: center;
@@ -148,11 +149,13 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            flex-wrap: nowrap;
         }
         .radio-buttons {
             display: flex;
             gap: 5px;
             margin-left: 10px;
+            align-items: center;
         }
         .radio-buttons input {
             margin-right: 5px;
@@ -170,9 +173,13 @@
         }
         .w9-message {
             font-weight: bold;
-            color: white;
+            color: #00FFFF; /* Cyan */
             margin-top: 5px;
             font-size: 16px;
+            font-style: italic;
+        }
+        .tax-exempt-message, .payment-terms-message {
+            color: #00FFFF; /* Cyan */
         }
         .logo-container {
             margin-bottom: 10px;
@@ -180,48 +187,120 @@
             padding: 10px;
         }
         .logo-container img {
-            width: 100px;
+            width: 150px;
             height: auto;
             display: block;
             margin: 0 auto;
+        }
+        #multi_location_message {
+            color: green;
         }
     </style>
     <script>
         function addLocation() {
             var locations = document.getElementById('locations');
             var count = locations.getElementsByClassName('location').length;
-            var newLoc = locations.getElementsByClassName('location')[0].cloneNode(true);
-            
-            newLoc.querySelector('h2').textContent = 'Location ' + (count + 1) + ' Information';
+            var singleBillingYes = document.getElementById('single_billing_yes') && document.getElementById('single_billing_yes').checked;
+            var newLoc;
+
+            if (singleBillingYes) {
+                newLoc = document.createElement('div');
+                newLoc.className = 'location';
+                newLoc.innerHTML = `
+                    <h2>Location ${count + 1} Information</h2>
+                    <div>
+                        <label>Purchasing Contact:</label>
+                        <div class="row">
+                            <input type="text" name="purchasing_first[${count}]" placeholder="First Name" required aria-label="Purchasing Contact First Name">
+                            <input type="text" name="purchasing_last[${count}]" placeholder="Last Name" required aria-label="Purchasing Contact Last Name">
+                        </div>
+                        <div class="row">
+                            <input type="email" name="purchasing_email[${count}]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" required aria-label="Purchasing Contact Email">
+                            <input type="tel" name="purchasing_phone[${count}]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Purchasing Contact Phone">
+                        </div>
+                    </div>
+                    <div>
+                        <label>Ship to Address:</label>
+                        <div class="row">
+                            <input type="text" name="ship_street[${count}]" placeholder="Street" required aria-label="Shipping Street">
+                            <input type="text" name="ship_city[${count}]" placeholder="City" required aria-label="Shipping City">
+                            <input type="text" name="ship_state[${count}]" placeholder="State" required aria-label="Shipping State">
+                            <input type="text" name="ship_zip[${count}]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" required aria-label="Shipping Zip Code">
+                        </div>
+                    </div>
+                    <div>
+                        <label>Warehouse and/or Receiving Contact:</label>
+                        <div class="row">
+                            <input type="text" name="warehouse_first[${count}]" placeholder="First Name" required aria-label="Warehouse Contact First Name">
+                            <input type="text" name="warehouse_last[${count}]" placeholder="Last Name" required aria-label="Warehouse Contact Last Name">
+                        </div>
+                        <div class="row">
+                            <input type="email" name="warehouse_email[${count}]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" required aria-label="Warehouse Contact Email">
+                            <input type="tel" name="warehouse_phone[${count}]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Warehouse Contact Phone">
+                        </div>
+                    </div>
+                    <div class="dropdown-group">
+                        <label for="delivery_hours[${count}]">Dock Availability:</label>
+                        <div class="dropdown-field">
+                            <input type="text" id="delivery_hours[${count}]" name="delivery_hours[${count}]" placeholder="Hours & Days" required aria-label="Dock Availability">
+                        </div>
+                    </div>
+                    <div class="radio-group">
+                        <label>Liftgate Required?</label>
+                        <div class="radio-buttons">
+                            <input type="radio" id="liftgate_yes[${count}]" name="liftgate[${count}]" value="yes" required> 
+                            <label for="liftgate_yes[${count}]">Yes</label>
+                            <input type="radio" id="liftgate_no[${count}]" name="liftgate[${count}]" value="no"> 
+                            <label for="liftgate_no[${count}]">No</label>
+                        </div>
+                    </div>
+                    <div class="radio-group">
+                        <label>Delivery Appointment Required?</label>
+                        <div class="radio-buttons">
+                            <input type="radio" id="appt_yes[${count}]" name="appt[${count}]" value="yes" required> 
+                            <label for="appt_yes[${count}]">Yes</label>
+                            <input type="radio" id="appt_no[${count}]" name="appt[${count}]" value="no"> 
+                            <label for="appt_no[${count}]">No</label>
+                        </div>
+                    </div>
+                `;
+            } else {
+                newLoc = locations.getElementsByClassName('location')[0].cloneNode(true);
+                newLoc.querySelector('h2').textContent = 'Location ' + (count + 1) + ' Information';
+                var inputs = newLoc.querySelectorAll('input');
+                for (var i = 0; i < inputs.length; i++) {
+                    if (inputs[i].name) {
+                        inputs[i].name = inputs[i].name.replace(/\[\d+\]/, '[' + count + ']');
+                        inputs[i].value = '';
+                        if (inputs[i].type === 'radio') {
+                            inputs[i].checked = false;
+                        }
+                        if (inputs[i].name.startsWith('delivery_hours')) {
+                            inputs[i].id = 'delivery_hours[' + count + ']';
+                            inputs[i].setAttribute('aria-label', 'Dock Availability');
+                            inputs[i].placeholder = 'Hours & Days';
+                            inputs[i].setAttribute('required', 'required');
+                        }
+                        if (inputs[i].name.match(/^(purchasing|warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
+                            inputs[i].setAttribute('required', 'required');
+                        }
+                        if (inputs[i].name.startsWith('liftgate') || inputs[i].name.startsWith('appt')) {
+                            inputs[i].setAttribute('required', 'required');
+                        }
+                    }
+                }
+                var label = newLoc.querySelector('label[for^="delivery_hours"]');
+                if (label) {
+                    label.textContent = 'Dock Availability:';
+                    label.setAttribute('for', 'delivery_hours[' + count + ']');
+                }
+            }
+
             var removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.textContent = 'Remove Location';
             removeBtn.onclick = function() { removeLocation(this); };
             newLoc.appendChild(removeBtn);
-            
-            var inputs = newLoc.querySelectorAll('input');
-            for (var i = 0; i < inputs.length; i++) {
-                if (inputs[i].name) {
-                    inputs[i].name = inputs[i].name.replace(/\[\d+\]/, '[' + count + ']');
-                    inputs[i].value = '';
-                    if (inputs[i].type === 'radio') {
-                        inputs[i].checked = false;
-                    }
-                    if (inputs[i].name.startsWith('delivery_hours')) {
-                        inputs[i].id = 'delivery_hours[' + count + ']';
-                        inputs[i].setAttribute('aria-label', 'Dock Availability');
-                        inputs[i].placeholder = 'Hours & Days';
-                    }
-                    if (inputs[i].name.match(/^(warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
-                        inputs[i].setAttribute('required', 'required');
-                    }
-                }
-            }
-            var label = newLoc.querySelector('label[for^="delivery_hours"]');
-            if (label) {
-                label.textContent = 'Dock Availability:';
-                label.setAttribute('for', 'delivery_hours[' + count + ']');
-            }
             
             locations.appendChild(newLoc);
         }
@@ -247,9 +326,13 @@
                         inputs[j].id = 'delivery_hours[' + i + ']';
                         inputs[j].setAttribute('aria-label', 'Dock Availability');
                         inputs[j].placeholder = 'Hours & Days';
+                        inputs[j].setAttribute('required', 'required');
                     }
-                    if (inputs[j].name.match(/^(warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
-                        inputs[i].setAttribute('required', 'required');
+                    if (inputs[j].name.match(/^(purchasing|warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
+                        inputs[j].setAttribute('required', 'required');
+                    }
+                    if (inputs[j].name.startsWith('liftgate') || inputs[j].name.startsWith('appt')) {
+                        inputs[j].setAttribute('required', 'required');
                     }
                 }
                 var label = locations[i].querySelector('label[for^="delivery_hours"]');
@@ -286,20 +369,26 @@
 
         function showNetworkSetup() {
             document.getElementById('network_setup').style.display = 'block';
+            document.getElementById('multi_location_message').style.display = 'block';
+            updateSingleBillingVisibility();
         }
 
         function hideNetworkSetup() {
             document.getElementById('network_setup').style.display = 'none';
+            document.getElementById('multi_location_message').style.display = 'none';
             hideBillingType();
+            updateSingleBillingVisibility();
         }
 
         function showBillingType() {
             document.getElementById('billing_type').style.display = 'block';
+            updateSingleBillingVisibility();
         }
 
         function hideBillingType() {
             document.getElementById('billing_type').style.display = 'none';
             hideBillingMessages();
+            updateSingleBillingVisibility();
         }
 
         function showLocalizedMessage() {
@@ -317,6 +406,26 @@
             document.getElementById('centralized_message').style.display = 'none';
         }
 
+        function updateSingleBillingVisibility() {
+            const multiLocationYes = document.getElementById('multi_location_yes').checked;
+            const rgSetupNo = document.getElementById('rg_setup_no') && document.getElementById('rg_setup_no').checked;
+            const singleBillingDiv = document.getElementById('single_billing');
+            if (multiLocationYes && rgSetupNo) {
+                singleBillingDiv.style.display = 'flex';
+            } else {
+                singleBillingDiv.style.display = 'none';
+                document.getElementById('single_billing_message').style.display = 'none';
+            }
+        }
+
+        function showSingleBillingMessage() {
+            if (document.getElementById('single_billing_no').checked) {
+                document.getElementById('single_billing_message').style.display = 'block';
+            } else {
+                document.getElementById('single_billing_message').style.display = 'none';
+            }
+        }
+
         window.onload = function() {
             const canvas = document.getElementById('signature-pad');
             const ctx = canvas.getContext('2d');
@@ -332,6 +441,7 @@
                 canvas.width = rect.width * dpr;
                 canvas.height = rect.height * dpr;
                 ctx.scale(dpr, dpr);
+                ctx.strokeStyle = '#ffffff';
                 canvas.style.width = rect.width + 'px';
                 canvas.style.height = rect.height + 'px';
             }
@@ -384,6 +494,7 @@
             document.getElementById('clear-signature').addEventListener('click', () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 document.getElementById('signature-data').value = '';
+                ctx.strokeStyle = '#ffffff';
             });
 
             document.querySelector('form').addEventListener('submit', (e) => {
@@ -413,6 +524,17 @@
                 document.getElementById('payment_terms_message').style.display = 'none';
                 document.getElementById('payment_terms_no_message').style.display = 'block';
             });
+
+            document.getElementById('multi_location_yes').addEventListener('change', showNetworkSetup);
+            document.getElementById('multi_location_no').addEventListener('change', hideNetworkSetup);
+            if (document.getElementById('rg_setup_yes')) {
+                document.getElementById('rg_setup_yes').addEventListener('change', showBillingType);
+            }
+            if (document.getElementById('rg_setup_no')) {
+                document.getElementById('rg_setup_no').addEventListener('change', hideBillingType);
+            }
+            document.getElementById('single_billing_yes').addEventListener('change', showSingleBillingMessage);
+            document.getElementById('single_billing_no').addEventListener('change', showSingleBillingMessage);
 
             document.getElementById('save-form').addEventListener('click', saveForm);
             document.getElementById('clear-form').addEventListener('click', clearForm);
@@ -447,6 +569,7 @@
             if (!saved) return;
             const data = JSON.parse(saved);
             const numLocations = data['num_locations'] || 1;
+            const singleBillingYes = data['single_billing'] === 'yes';
             for (let i = 1; i < numLocations; i++) {
                 addLocation();
             }
@@ -477,6 +600,8 @@
                 document.getElementById('payment_terms_message').style.display = 'none';
                 document.getElementById('payment_terms_no_message').style.display = 'block';
             }
+            updateSingleBillingVisibility();
+            showSingleBillingMessage();
             if (data['signature']) {
                 const ctx = document.getElementById('signature-pad').getContext('2d');
                 const img = new Image();
@@ -501,8 +626,12 @@
             document.getElementById('payment_terms_message').style.display = 'none';
             document.getElementById('payment_terms_no_message').style.display = 'none';
             hideNetworkSetup();
+            document.getElementById('single_billing').style.display = 'none';
+            document.getElementById('single_billing_message').style.display = 'none';
+            document.getElementById('multi_location_message').style.display = 'none';
             const ctx = document.getElementById('signature-pad').getContext('2d');
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.strokeStyle = '#ffffff';
             alert('Form cleared!');
         }
     </script>
@@ -519,7 +648,7 @@
         <div>
             <label for="customer_name">Customer Name:</label><br>
             <input type="text" id="customer_name" name="customer_name" required aria-label="Customer Name">
-            <br>
+            <br><br>
             <h6 class="w9-message">Please provide an up to date W-9</h6>
         </div>
 
@@ -532,7 +661,7 @@
                 <label for="tax_exempt_no">No</label>
             </div>
         </div>
-        <div id="tax_exempt_message" style="display:none; color:red;">
+        <div id="tax_exempt_message" class="tax-exempt-message" style="display:none;">
             Please provide a tax-exemption form to your rep
         </div>
 
@@ -545,7 +674,7 @@
                 <label for="payment_terms_no">No</label>
             </div>
         </div>
-        <div id="payment_terms_message" style="display:none; color:red;">
+        <div id="payment_terms_message" class="payment-terms-message" style="display:none;">
             Please provide a credit reference form to your rep
         </div>
         <div id="payment_terms_no_message" style="display:none; color:red;">
@@ -632,6 +761,9 @@
                 <label for="multi_location_no">No</label>
             </div>
         </div>
+        <div id="multi_location_message" style="display:none; color:green;">
+            Please add additional locations below to provide each location's shipping information
+        </div>
         <div id="network_setup" style="display:none;">
             <div class="radio-group">
                 <label>Is your network already set up with RG?</label>
@@ -661,7 +793,7 @@
             </div>
         </div>
 
-        <div class="radio-group">
+        <div id="single_billing" class="radio-group" style="display:none;">
             <label>Do you have a single billing point of contact?</label>
             <div class="radio-buttons">
                 <input type="radio" id="single_billing_yes" name="single_billing" value="yes" required> 
@@ -670,15 +802,8 @@
                 <label for="single_billing_no">No</label>
             </div>
         </div>
-
-        <div class="radio-group">
-            <label>Do you have a single delivery address?</label>
-            <div class="radio-buttons">
-                <input type="radio" id="single_delivery_yes" name="single_delivery" value="yes" required> 
-                <label for="single_delivery_yes">Yes</label>
-                <input type="radio" id="single_delivery_no" name="single_delivery" value="no"> 
-                <label for="single_delivery_no">No</label>
-            </div>
+        <div id="single_billing_message" style="display:none; color:green;">
+            Please add additional locations below to provide billing and shipping information for each location
         </div>
 
         <div id="locations">
@@ -743,14 +868,14 @@
                 <div class="dropdown-group">
                     <label for="delivery_hours[0]">Dock Availability:</label>
                     <div class="dropdown-field">
-                        <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" placeholder="Hours & Days" aria-label="Dock Availability">
+                        <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" placeholder="Hours & Days" required aria-label="Dock Availability">
                     </div>
                 </div>
 
                 <div class="radio-group">
                     <label>Liftgate Required?</label>
                     <div class="radio-buttons">
-                        <input type="radio" id="liftgate_yes[0]" name="liftgate[0]" value="yes"> 
+                        <input type="radio" id="liftgate_yes[0]" name="liftgate[0]" value="yes" required> 
                         <label for="liftgate_yes[0]">Yes</label>
                         <input type="radio" id="liftgate_no[0]" name="liftgate[0]" value="no"> 
                         <label for="liftgate_no[0]">No</label>
@@ -760,7 +885,7 @@
                 <div class="radio-group">
                     <label>Delivery Appointment Required?</label>
                     <div class="radio-buttons">
-                        <input type="radio" id="appt_yes[0]" name="appt[0]" value="yes"> 
+                        <input type="radio" id="appt_yes[0]" name="appt[0]" value="yes" required> 
                         <label for="appt_yes[0]">Yes</label>
                         <input type="radio" id="appt_no[0]" name="appt[0]" value="no"> 
                         <label for="appt_no[0]">No</label>
