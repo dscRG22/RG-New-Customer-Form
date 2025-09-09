@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <img src="your-logo-file.png" alt="Company Logo">
     <title>New Customer Intake Form</title>
     <style>
         body {
@@ -350,6 +349,9 @@
     </script>
 </head>
 <body>
+    <div class="logo-container">
+        <img src="your-logo-file.png" alt="Company Logo">
+    </div>
     <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field">
         <input type="hidden" name="form-name" value="customer-intake">
         <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
