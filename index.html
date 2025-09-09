@@ -132,7 +132,8 @@
         #signature-pad {
             border: 1px solid #666;
             background-color: #222;
-            width: 375px;
+            width: 100%;
+            max-width: 400px;
             height: 150px;
             display: block;
         }
@@ -956,7 +957,7 @@
         <div id="signature-section">
             <div class="signature-container">
                 <label for="signature-pad">Signature (Required):</label>
-                <canvas id="signature-pad" width="375" height="150" aria-label="Signature Pad"></canvas>
+                <canvas id="signature-pad" width="400" height="150" aria-label="Signature Pad"></canvas>
                 <input type="hidden" id="signature-data" name="signature" value="">
                 <button type="button" id="clear-signature">Clear Signature</button>
             </div>
