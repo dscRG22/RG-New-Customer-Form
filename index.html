@@ -39,12 +39,20 @@
             background-color: #444;
             border: 1px solid #666;
         }
+        .row input::placeholder {
+            color: #ccc;
+            opacity: 1;
+        }
         #customer_name {
             max-width: 400px;
             width: 100%;
             color: white;
             background-color: #444;
             border: 1px solid #666;
+        }
+        #customer_name::placeholder {
+            color: #ccc;
+            opacity: 1;
         }
         #notes {
             max-width: 500px;
@@ -54,10 +62,18 @@
             background-color: #444;
             border: 1px solid #666;
         }
+        #notes::placeholder {
+            color: #ccc;
+            opacity: 1;
+        }
         #dist_location {
             color: white;
             background-color: #444;
             border: 1px solid #666;
+        }
+        #dist_location::placeholder {
+            color: #ccc;
+            opacity: 1;
         }
         input[name^="delivery_hours"] {
             color: white;
@@ -65,11 +81,19 @@
             border: 1px solid #666;
             width: 250px;
         }
+        input[name^="delivery_hours"]::placeholder {
+            color: #ccc;
+            opacity: 1;
+        }
         input[name="other_pricing"] {
             color: white;
             background-color: #444;
             border: 1px solid #666;
             max-width: 250px;
+        }
+        input[name="other_pricing"]::placeholder {
+            color: #ccc;
+            opacity: 1;
         }
         div {
             margin-bottom: 15px;
@@ -150,7 +174,6 @@
             margin-top: 5px;
             font-size: 16px;
         }
-
         .logo-container {
             margin-bottom: 10px;
             text-align: center;
@@ -166,19 +189,16 @@
     <script>
         function addLocation() {
             var locations = document.getElementById('locations');
-            if (!locations.getElementsByClassName('location')[0]) return;
             var count = locations.getElementsByClassName('location').length;
             var newLoc = locations.getElementsByClassName('location')[0].cloneNode(true);
             
-            // Update header and add remove button
-            newLoc.querySelector('h2').textContent = 'Location ' + count + ' Information';
+            newLoc.querySelector('h2').textContent = 'Location ' + (count + 1) + ' Information';
             var removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.textContent = 'Remove Location';
             removeBtn.onclick = function() { removeLocation(this); };
             newLoc.appendChild(removeBtn);
             
-            // Update input names, clear values, ensure correct label/placeholder, and set required
             var inputs = newLoc.querySelectorAll('input');
             for (var i = 0; i < inputs.length; i++) {
                 if (inputs[i].name) {
@@ -192,13 +212,11 @@
                         inputs[i].setAttribute('aria-label', 'Dock Availability');
                         inputs[i].placeholder = 'Hours & Days';
                     }
-                    // Ensure required fields in cloned locations
                     if (inputs[i].name.match(/^(warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
                         inputs[i].setAttribute('required', 'required');
                     }
                 }
             }
-            // Update label for Dock Availability
             var label = newLoc.querySelector('label[for^="delivery_hours"]');
             if (label) {
                 label.textContent = 'Dock Availability:';
@@ -219,7 +237,7 @@
         function updateLocationHeaders() {
             var locations = document.getElementById('locations').getElementsByClassName('location');
             for (var i = 0; i < locations.length; i++) {
-                locations[i].querySelector('h2').textContent = 'Location ' + (i === 0 ? 'Primary' : i) + ' Information';
+                locations[i].querySelector('h2').textContent = (i === 0 ? 'Primary' : (i + 1)) + ' Information';
                 var inputs = locations[i].querySelectorAll('input');
                 for (var j = 0; j < inputs.length; j++) {
                     if (inputs[j].name) {
@@ -230,9 +248,8 @@
                         inputs[j].setAttribute('aria-label', 'Dock Availability');
                         inputs[j].placeholder = 'Hours & Days';
                     }
-                    // Ensure required fields in updated locations
                     if (inputs[j].name.match(/^(warehouse|ap)_(first|last|email|phone)\[\d+\]$/)) {
-                        inputs[j].setAttribute('required', 'required');
+                        inputs[i].setAttribute('required', 'required');
                     }
                 }
                 var label = locations[i].querySelector('label[for^="delivery_hours"]');
@@ -267,7 +284,39 @@
             }
         }
 
-        // Signature Pad JavaScript
+        function showNetworkSetup() {
+            document.getElementById('network_setup').style.display = 'block';
+        }
+
+        function hideNetworkSetup() {
+            document.getElementById('network_setup').style.display = 'none';
+            hideBillingType();
+        }
+
+        function showBillingType() {
+            document.getElementById('billing_type').style.display = 'block';
+        }
+
+        function hideBillingType() {
+            document.getElementById('billing_type').style.display = 'none';
+            hideBillingMessages();
+        }
+
+        function showLocalizedMessage() {
+            document.getElementById('localized_message').style.display = 'block';
+            document.getElementById('centralized_message').style.display = 'none';
+        }
+
+        function showCentralizedMessage() {
+            document.getElementById('centralized_message').style.display = 'block';
+            document.getElementById('localized_message').style.display = 'none';
+        }
+
+        function hideBillingMessages() {
+            document.getElementById('localized_message').style.display = 'none';
+            document.getElementById('centralized_message').style.display = 'none';
+        }
+
         window.onload = function() {
             const canvas = document.getElementById('signature-pad');
             const ctx = canvas.getContext('2d');
@@ -276,6 +325,18 @@
             let isDrawing = false;
             let lastX = 0;
             let lastY = 0;
+
+            function resizeCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
 
             canvas.addEventListener('mousedown', (e) => {
                 isDrawing = true;
@@ -295,13 +356,12 @@
             canvas.addEventListener('mouseup', () => isDrawing = false);
             canvas.addEventListener('mouseout', () => isDrawing = false);
 
-            // Touch support for mobile devices
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const touch = e.touches[0];
                 const rect = canvas.getBoundingClientRect();
                 isDrawing = true;
-                [lastX, lastY] = [touch.clientX - rect.left, touch.clientY - rect.top];
+                [lastX, lastY] = [(touch.clientX - rect.left) * (canvas.width / rect.width), (touch.clientY - rect.top) * (canvas.height / rect.height)];
             });
 
             canvas.addEventListener('touchmove', (e) => {
@@ -309,8 +369,8 @@
                 if (isDrawing) {
                     const touch = e.touches[0];
                     const rect = canvas.getBoundingClientRect();
-                    const x = touch.clientX - rect.left;
-                    const y = touch.clientY - rect.top;
+                    const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+                    const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
                     ctx.beginPath();
                     ctx.moveTo(lastX, lastY);
                     ctx.lineTo(x, y);
@@ -321,16 +381,14 @@
 
             canvas.addEventListener('touchend', () => isDrawing = false);
 
-            // Clear signature
             document.getElementById('clear-signature').addEventListener('click', () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 document.getElementById('signature-data').value = '';
             });
 
-            // Update hidden input with base64 signature data on form submit
             document.querySelector('form').addEventListener('submit', (e) => {
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const isCanvasEmpty = imageData.every(val => val === 0);
+                const isCanvasEmpty = imageData.every((val, index) => index % 4 === 3 ? val === 255 : val === 0);
                 if (isCanvasEmpty) {
                     e.preventDefault();
                     alert('Please provide a signature.');
@@ -340,7 +398,6 @@
                 document.getElementById('signature-data').value = signatureData;
             });
 
-            // Tax exempt message toggle
             document.getElementById('tax_exempt_yes').addEventListener('change', () => {
                 document.getElementById('tax_exempt_message').style.display = 'block';
             });
@@ -348,7 +405,6 @@
                 document.getElementById('tax_exempt_message').style.display = 'none';
             });
 
-            // Payment terms message toggle
             document.getElementById('payment_terms_yes').addEventListener('change', () => {
                 document.getElementById('payment_terms_message').style.display = 'block';
                 document.getElementById('payment_terms_no_message').style.display = 'none';
@@ -357,16 +413,107 @@
                 document.getElementById('payment_terms_message').style.display = 'none';
                 document.getElementById('payment_terms_no_message').style.display = 'block';
             });
+
+            document.getElementById('save-form').addEventListener('click', saveForm);
+            document.getElementById('clear-form').addEventListener('click', clearForm);
+
+            loadForm();
         };
+
+        function saveForm() {
+            const form = document.querySelector('form');
+            const formData = new FormData(form);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                if (!data[key]) {
+                    data[key] = value;
+                } else {
+                    if (!Array.isArray(data[key])) {
+                        data[key] = [data[key]];
+                    }
+                    data[key].push(value);
+                }
+            }
+            const locations = document.getElementById('locations').getElementsByClassName('location').length;
+            data['num_locations'] = locations;
+            const canvas = document.getElementById('signature-pad');
+            data['signature'] = canvas.toDataURL('image/png');
+            localStorage.setItem('customerIntakeForm', JSON.stringify(data));
+            alert('Form saved!');
+        }
+
+        function loadForm() {
+            const saved = localStorage.getItem('customerIntakeForm');
+            if (!saved) return;
+            const data = JSON.parse(saved);
+            const numLocations = data['num_locations'] || 1;
+            for (let i = 1; i < numLocations; i++) {
+                addLocation();
+            }
+            for (let key in data) {
+                if (key === 'num_locations' || key === 'signature') continue;
+                const elements = document.querySelectorAll(`[name="${key}"]`);
+                let values = Array.isArray(data[key]) ? data[key] : [data[key]];
+                elements.forEach((el, idx) => {
+                    if (el.type === 'radio' || el.type === 'checkbox') {
+                        if (el.value === values[0]) el.checked = true;
+                    } else {
+                        el.value = values[idx] || '';
+                    }
+                });
+            }
+            if (document.getElementById('multi_location_yes') && document.getElementById('multi_location_yes').checked) showNetworkSetup();
+            if (document.getElementById('rg_setup_yes') && document.getElementById('rg_setup_yes').checked) showBillingType();
+            if (document.getElementById('billing_centralized') && document.getElementById('billing_centralized').checked) showCentralizedMessage();
+            if (document.getElementById('billing_localized') && document.getElementById('billing_localized').checked) showLocalizedMessage();
+            if (document.getElementById('gpo_yes').checked) showGpoOptions();
+            if (document.getElementById('distributor_yes').checked) showDistOptions();
+            if (document.getElementById('pricing').value === 'other') checkOther(document.getElementById('pricing'));
+            if (document.getElementById('tax_exempt_yes').checked) document.getElementById('tax_exempt_message').style.display = 'block';
+            if (document.getElementById('payment_terms_yes').checked) {
+                document.getElementById('payment_terms_message').style.display = 'block';
+                document.getElementById('payment_terms_no_message').style.display = 'none';
+            } else if (document.getElementById('payment_terms_no').checked) {
+                document.getElementById('payment_terms_message').style.display = 'none';
+                document.getElementById('payment_terms_no_message').style.display = 'block';
+            }
+            if (data['signature']) {
+                const ctx = document.getElementById('signature-pad').getContext('2d');
+                const img = new Image();
+                img.src = data['signature'];
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
+                };
+            }
+        }
+
+        function clearForm() {
+            localStorage.removeItem('customerIntakeForm');
+            document.querySelector('form').reset();
+            const locations = document.getElementById('locations');
+            while (locations.getElementsByClassName('location').length > 1) {
+                locations.lastChild.remove();
+            }
+            hideGpoOptions();
+            hideDistOptions();
+            document.getElementById('other_pricing').style.display = 'none';
+            document.getElementById('tax_exempt_message').style.display = 'none';
+            document.getElementById('payment_terms_message').style.display = 'none';
+            document.getElementById('payment_terms_no_message').style.display = 'none';
+            hideNetworkSetup();
+            const ctx = document.getElementById('signature-pad').getContext('2d');
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            alert('Form cleared!');
+        }
     </script>
 </head>
 <body>
     <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field">
         <input type="hidden" name="form-name" value="customer-intake">
         <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
-           <div class="logo-container">
-        <img src="your-logo-file.png" alt="Company Logo">
-    </div>
+        <div class="logo-container">
+            <img src="your-logo-file.png" alt="Company Logo">
+        </div>
         <h1>New Customer Intake Form</h1>
 
         <div>
@@ -474,6 +621,44 @@
         </div>
         <div id="other_pricing" style="display:none;">
             <input type="text" name="other_pricing" maxlength="20" aria-label="Custom Pricing Structure">
+        </div>
+
+        <div class="radio-group">
+            <label>Are you a part of a multi-location entity?</label>
+            <div class="radio-buttons">
+                <input type="radio" id="multi_location_yes" name="multi_location" value="yes" onclick="showNetworkSetup()"> 
+                <label for="multi_location_yes">Yes</label>
+                <input type="radio" id="multi_location_no" name="multi_location" value="no" onclick="hideNetworkSetup()"> 
+                <label for="multi_location_no">No</label>
+            </div>
+        </div>
+        <div id="network_setup" style="display:none;">
+            <div class="radio-group">
+                <label>Is your network already set up with RG?</label>
+                <div class="radio-buttons">
+                    <input type="radio" id="rg_setup_yes" name="rg_setup" value="yes" onclick="showBillingType()"> 
+                    <label for="rg_setup_yes">Yes</label>
+                    <input type="radio" id="rg_setup_no" name="rg_setup" value="no" onclick="hideBillingType()"> 
+                    <label for="rg_setup_no">No</label>
+                </div>
+            </div>
+        </div>
+        <div id="billing_type" style="display:none;">
+            <div class="radio-group">
+                <label>Is your billing centralized or localized?</label>
+                <div class="radio-buttons">
+                    <input type="radio" id="billing_centralized" name="billing" value="centralized" onclick="showCentralizedMessage()"> 
+                    <label for="billing_centralized">Centralized</label>
+                    <input type="radio" id="billing_localized" name="billing" value="localized" onclick="showLocalizedMessage()"> 
+                    <label for="billing_localized">Localized</label>
+                </div>
+            </div>
+            <div id="centralized_message" style="display:none; color:green;">
+                By selecting this field RG will set up your location as a sub-account and send invoices to your parent company
+            </div>
+            <div id="localized_message" style="display:none; color:red;">
+                In the primary information below please provide information relevant to your specific location
+            </div>
         </div>
 
         <div class="radio-group">
@@ -600,6 +785,8 @@
             </div>
         </div>
 
+        <button type="button" id="save-form">Save</button>
+        <button type="button" id="clear-form">Clear</button>
         <button type="submit">Submit Form</button>
     </form>
 </body>
