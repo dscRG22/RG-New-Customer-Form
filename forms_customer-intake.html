@@ -1,0 +1,124 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Intake Form (Static)</title>
+</head>
+<body>
+    <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="customer-intake">
+        <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
+        <input type="text" name="customer_name" required>
+        <input type="radio" name="multi_location" value="yes">
+        <input type="radio" name="multi_location" value="no">
+        <input type="radio" name="rg_setup" value="yes">
+        <input type="radio" name="rg_setup" value="no">
+        <input type="radio" name="billing" value="centralized">
+        <input type="radio" name="billing" value="localized">
+        <input type="radio" name="tax_exempt" value="yes" required>
+        <input type="radio" name="tax_exempt" value="no">
+        <input type="radio" name="payment_terms" value="yes" required>
+        <input type="radio" name="payment_terms" value="no">
+        <select name="rep" required>
+            <option value="">Select a rep</option>
+            <option>Kris</option>
+            <option>Tia</option>
+            <option>Leann</option>
+            <option>Kelly</option>
+            <option>Kelli</option>
+        </select>
+        <input type="radio" name="gpo" value="yes" required>
+        <input type="radio" name="gpo" value="no">
+        <select name="gpo_type">
+            <option>Premier</option>
+            <option>Vizient</option>
+            <option>VA</option>
+            <option>Forum</option>
+            <option>Sodexo</option>
+        </select>
+        <input type="radio" name="distributor" value="yes" required>
+        <input type="radio" name="distributor" value="no">
+        <select name="dist_type">
+            <option>US Foods</option>
+            <option>Sysco</option>
+            <option>GFS</option>
+            <option>Food Buy</option>
+            <option>Performance Food Group</option>
+        </select>
+        <input type="text" name="dist_location" maxlength="50">
+        <select name="pricing">
+            <option>Frontline</option>
+            <option>GPO</option>
+            <option>WS</option>
+            <option>Coffee Shop</option>
+            <option>Sussex</option>
+            <option>Sodexo</option>
+            <option>other</option>
+        </select>
+        <input type="text" name="other_pricing" maxlength="20">
+        <input type="radio" name="single_billing" value="yes" required>
+        <input type="radio" name="single_billing" value="no">
+        <!-- Primary location -->
+        <input type="text" name="purchasing_first[]" required>
+        <input type="text" name="purchasing_last[]" required>
+        <input type="email" name="purchasing_email[]" required>
+        <input type="tel" name="purchasing_phone[]" required>
+        <input type="text" name="billing_street[]" required>
+        <input type="text" name="billing_city[]" required>
+        <input type="text" name="billing_state[]" required>
+        <input type="text" name="billing_zip[]" required>
+        <input type="text" name="ap_first[]" required>
+        <input type="text" name="ap_last[]" required>
+        <input type="email" name="ap_email[]" required>
+        <input type="tel" name="ap_phone[]" required>
+        <input type="text" name="ship_street[]" required>
+        <input type="text" name="ship_city[]" required>
+        <input type="text" name="ship_state[]" required>
+        <input type="text" name="ship_zip[]" required>
+        <input type="text" name="warehouse_first[]" required>
+        <input type="text" name="warehouse_last[]" required>
+        <input type="email" name="warehouse_email[]" required>
+        <input type="tel" name="warehouse_phone[]" required>
+        <input type="text" name="delivery_hours[]" required>
+        <input type="radio" name="liftgate[0]" value="yes" required>
+        <input type="radio" name="liftgate[0]" value="no">
+        <input type
