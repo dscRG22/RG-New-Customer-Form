@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Intake Form (Static)</title>
+</head>
+<body>
+    <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="customer-intake">
+        <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
+        <input type="text" name="customer_name" required>
+        <input type="radio" name="multi_location" value="yes">
+        <input type="radio" name="multi_location" value="no">
+        <input type="radio" name="rg_setup" value="yes">
+        <input type="radio" name="rg_setup" value="no">
+        <input type="radio" name="billing" value="centralized">
+        <input type="radio" name="billing" value="localized">
+        <input type="radio" name="tax_exempt" value="yes" required>
+        <input type="radio" name="tax_exempt" value="no">
+        <input type="radio" name="payment_terms" value="yes" required>
+        <input type="radio" name="payment_terms" value="no">
+        <select name="rep" required>
+            <option value="">Select a rep</option>
+            <option>Kris</option>
+            <option>Tia</option>
+            <option>Leann</option>
+            <option>Kelly</option>
+            <option>Kelli</option>
+        </select>
+        <input type="radio" name="gpo" value="yes" required>
+        <input type="radio" name="gpo" value="no">
+        <select name="gpo_type">
+            <option>Premier</option>
+            <option>Vizient</option>
+            <option>VA</option>
+            <option>Forum</option>
+            <option>Sodexo</option>
+        </select>
+        <input type="radio" name="distributor" value="yes" required>
+        <input type="radio" name="distributor" value="no">
+        <select name="dist_type">
+            <option>US Foods</option>
+            <option>Sysco</option>
+            <option>GFS</option>
+            <option>Food Buy</option>
+            <option>Performance Food Group</option>
+        </select>
+        <input type="text" name="dist_location" maxlength="50">
+        <select name="pricing">
+            <option>Frontline</option>
+            <option>GPO</option>
+            <option>WS</option>
+            <option>Coffee Shop</option>
+            <option>Sussex</option>
+            <option>Sodexo</option>
+            <option>other</option>
+        </select>
+        <input type="text" name="other_pricing" maxlength="20">
+        <input type="radio" name="single_billing" value="yes" required>
+        <input type="radio" name="single_billing" value="no">
+        <!-- Location 1 (Primary) -->
+        <input type="text" name="purchasing_first[]" required>
+        <input type="text" name="purchasing_last[]" required>
+        <input type="email" name="purchasing_email[]" required>
+        <input type="tel" name="purchasing_phone[]" required>
+        <input type="text" name="billing_street[]" required>
+        <input type="text" name="billing_city[]" required>
+        <input type="text" name="billing_state[]" required>
+        <input type="text" name="billing_zip[]" required>
+        <input type="text" name="ap_first[]" required>
+        <input type="text" name="ap_last[]" required>
+        <input type="email" name="ap_email[]" required>
+        <input type="tel" name="ap_phone[]" required>
+        <input type="text" name="ship_street[]" required>
+        <input type="text" name="ship_city[]" required>
+        <input type="text" name="ship_state[]" required>
+        <input type="text" name="ship_zip[]" required>
+        <input type="text" name="warehouse_first[]" required>
+        <input type="text" name="warehouse_last[]" required>
+        <input type="email" name="warehouse_email[]" required>
+        <input type="tel" name="warehouse_phone[]" required>
+        <input type="text" name="delivery_hours[]" required>
+        <input type="radio" name="liftgate[0]" value="yes" required>
+        <input type="radio" name="liftgate[0]" value="no">
+        <input type="radio" name="appt[0]" value="yes" required>
+        <input type="radio" name="appt[0]" value="no">
+        <!-- Location 2 -->
+        <input type="text" name="purchasing_first[]">
+        <input type="text" name="purchasing_last[]">
+        <input type="email" name="purchasing_email[]">
+        <input type="tel" name="purchasing_phone[]">
+        <input type="text" name="billing_street[]">
+        <input type="text" name="billing_city[]">
+        <input type="text" name="billing_state[]">
+        <input type="text" name="billing_zip[]">
+        <input type="text" name="ap_first[]">
+        <input type="text" name="ap_last[]">
+        <input type="email" name="ap_email[]">
+        <input type="tel" name="ap_phone[]">
+        <input type="text" name="ship_street[]">
+        <input type="text" name="ship_city[]">
+        <input type="text" name="ship_state[]">
+        <input type="text" name="ship_zip[]">
+        <input type="text" name="warehouse_first[]">
+        <input type="text" name="warehouse_last[]">
+        <input type="email" name="warehouse_email[]">
+        <input type="tel" name="warehouse_phone[]">
+        <input type="text" name="delivery_hours[]">
+        <input type="radio" name="liftgate[1]" value="yes">
+        <input type="radio" name="liftgate[1]" value="no">
+        <input type="radio" name="appt[1]" value="yes">
+        <input type="radio" name="appt[1]" value="no">
+        <!-- Location 3 -->
+        <input type="text" name="purchasing_first[]">
+        <input type="text" name="purchasing_last[]">
+        <input type="email" name="purchasing_email[]">
+        <input type="tel" name="purchasing_phone[]">
+        <input type="text" name="billing_street[]">
+        <input type="text" name="billing_city[]">
+        <input type="text" name="billing_state[]">
+        <input type="text" name="billing_zip[]">
+        <input type="text" name="ap_first[]">
+        <input type="text" name="ap_last[]">
+        <input type="email" name="ap_email[]">
+        <input type="tel" name="ap_phone[]">
+        <input type="text" name="ship_street[]">
+        <input type="text" name="ship_city[]">
+        <input type="text" name="ship_state[]">
+        <input type="text" name="ship_zip[]">
+        <input type="text" name="warehouse_first[]">
+        <input type="text" name="warehouse_last[]">
+        <input type="email" name="warehouse_email[]">
+        <input type="tel" name="warehouse_phone[]">
+        <input type="text" name="delivery_hours[]">
+        <input type="radio" name="liftgate[2]" value="yes">
+        <input type="radio" name="liftgate[2]" value="no">
+        <input type="radio" name="appt[2]" value="yes">
+        <input type="radio" name="appt[2]" value="no">
+        <!-- Location 4 -->
+        <input type="text" name="purchasing_first[]">
+        <input type="text" name="purchasing_last[]">
+        <input type="email" name="purchasing_email[]">
+        <input type="tel" name="purchasing_phone[]">
+        <input type="text" name="billing_street[]">
+        <input type="text" name="billing_city[]">
+        <input type="text" name="billing_state[]">
+        <input type="text" name="billing_zip[]">
+        <input type="text" name="ap_first[]">
+        <input type="text" name="ap_last[]">
+        <input type="email" name="ap_email[]">
+        <input type="tel" name="ap_phone[]">
+        <input type="text" name="ship_street[]">
+        <input type="text" name="ship_city[]">
+        <input type="text" name="ship_state[]">
+        <input type="text" name="ship_zip[]">
+        <input type="text" name="warehouse_first[]">
+        <input type="text" name="warehouse_last[]">
+        <input type="email" name="warehouse_email[]">
+        <input type="tel" name="warehouse_phone[]">
+        <input type="text" name="delivery_hours[]">
+        <input type="radio" name="liftgate[3]" value="yes">
+        <input type="radio" name="liftgate[3]" value="no">
+        <input type="radio" name="appt[3]" value="yes">
+        <input type="radio" name="appt[3]" value="no">
+        <!-- Location 5 -->
+        <input type="text" name="purchasing_first[]">
+        <input type="text" name="purchasing_last[]">
+        <input type="email" name="purchasing_email[]">
+        <input type="tel" name="purchasing_phone[]">
+        <input type="text" name="billing_street[]">
+        <input type="text" name="billing_city[]">
+        <input type="text" name="billing_state[]">
+        <input type="text" name="billing_zip[]">
+        <input type="text" name="ap_first[]">
+        <input type="text" name="ap_last[]">
+        <input type="email" name="ap_email[]">
+        <input type="tel" name="ap_phone[]">
+        <input type="text" name="ship_street[]">
+        <input type="text" name="ship_city[]">
+        <input type="text" name="ship_state[]">
+        <input type="text" name="ship_zip[]">
+        <input type="text" name="warehouse_first[]">
+        <input type="text" name="warehouse_last[]">
+        <input type="email" name="warehouse_email[]">
+        <input type="tel" name="warehouse_phone[]">
+        <input type="text" name="delivery_hours[]">
+        <input type="radio" name="liftgate[4]" value="yes">
+        <input type="radio" name="liftgate[4]" value="no">
+        <input type="radio" name="appt[4]" value="yes">
+        <input type="radio" name="appt[4]" value="no">
+        <textarea name="notes" maxlength="200"></textarea>
+        <input type="text" name="signature" required>
+        <button type="submit">Submit Form</button>
+    </form>
+</body>
+</html>
