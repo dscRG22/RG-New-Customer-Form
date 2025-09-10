@@ -239,28 +239,32 @@
             border: 1px solid #666;
             background-color: #222;
             width: 100%;
-            height: calc(100vh - 120px);
+            height: calc(100vh - 80px); /* Reduced space for instructions/buttons */
             display: block;
             visibility: visible;
             touch-action: none;
+            z-index: 1001;
         }
         #modal-instructions {
             color: #ccc;
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 12px; /* Smaller font */
+            margin-bottom: 5px;
             text-align: center;
         }
         #modal-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 10px;
+            margin-top: 5px;
         }
         #modal-orientation-prompt {
             color: #ff5555;
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 12px; /* Smaller font */
+            margin-bottom: 5px;
             display: none;
             text-align: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            border-radius: 3px;
         }
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
@@ -292,23 +296,13 @@
                 font-size: 14px;
             }
         }
-        /* Enforce Landscape for Modal */
+        /* Orientation Handling */
         @media (max-width: 600px) and (orientation: portrait) {
-            #signature-modal {
-                display: flex;
-            }
-            #modal-canvas {
-                display: none;
-            }
             #modal-orientation-prompt {
                 display: block;
             }
         }
         @media (max-width: 600px) and (orientation: landscape) {
-            #modal-canvas {
-                display: block;
-                visibility: visible;
-            }
             #modal-orientation-prompt {
                 display: none;
             }
@@ -620,6 +614,9 @@
             let lastX = 0;
             let lastY = 0;
 
+            // Ensure modal is hidden on load
+            signatureModal.style.display = 'none';
+
             // Show/hide signature pad vs modal button
             if (isMobile) {
                 signaturePad.style.display = 'none';
@@ -642,8 +639,8 @@
             function resizeCanvas() {
                 const rect = signaturePad.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                const width = Math.max(rect.width, 100); // Ensure non-zero width
-                const height = Math.max(rect.height, 50); // Ensure non-zero height
+                const width = Math.max(rect.width, 100);
+                const height = Math.max(rect.height, 50);
                 signaturePad.width = width * dpr;
                 signaturePad.height = height * dpr;
                 ctx.scale(dpr, dpr);
@@ -657,10 +654,10 @@
             // Resize modal canvas
             function resizeModalCanvas() {
                 if (!modalCanvas || !modalCtx) return;
-                const rect = modalCanvas.getBoundingClientRect();
+                const rect = signatureModal.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                const width = Math.max(rect.width, 100); // Ensure non-zero width
-                const height = Math.max(rect.height, 50); // Ensure non-zero height
+                const width = Math.max(rect.width - 20, 100); // Account for padding
+                const height = Math.max(rect.height - 80, 50); // Account for instructions/buttons
                 modalCanvas.width = width * dpr;
                 modalCanvas.height = height * dpr;
                 modalCtx.scale(dpr, dpr);
@@ -676,7 +673,6 @@
                 if (!isMobile || !modalOrientationPrompt) return;
                 const isLandscape = window.matchMedia("(orientation: landscape)").matches;
                 modalOrientationPrompt.style.display = isLandscape ? 'none' : 'block';
-                modalCanvas.style.display = isLandscape ? 'block' : 'none';
                 console.log('Orientation:', isLandscape ? 'landscape' : 'portrait');
             }
 
@@ -767,7 +763,6 @@
                     lastX = (touch.clientX - rect.left - window.scrollX) * (modalCanvas.width / rect.width);
                     lastY = (touch.clientY - rect.top - window.scrollY) * (modalCanvas.height / rect.height);
                     console.log('Touch start:', { x: lastX, y: lastY });
-                    // Draw a dot for visual feedback
                     modalCtx.beginPath();
                     modalCtx.arc(lastX, lastY, 1, 0, 2 * Math.PI);
                     modalCtx.fillStyle = '#ffffff';
@@ -800,11 +795,10 @@
                     console.log('Touch cancel');
                 });
 
-                // Modal open/close
                 signatureButton.addEventListener('click', () => {
                     signatureModal.style.display = 'flex';
-                    checkOrientation();
                     resizeModalCanvas();
+                    checkOrientation();
                     modalCanvas.focus();
                     console.log('Modal opened');
                 });
@@ -835,7 +829,6 @@
                     console.log('Modal closed');
                 });
 
-                // Close modal with Esc key
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && signatureModal.style.display === 'flex') {
                         signatureModal.style.display = 'none';
@@ -1307,7 +1300,7 @@
             <div class="signature-container">
                 <label for="signature-pad">Signature (Required):</label>
                 <div id="signature-instructions" style="color: #ccc; font-size: 12px; margin-bottom: 5px;">
-                    On desktop, use your mouse to draw your signature. On mobile, tap the button to open a full-screen signature pad.
+                    On desktop, use your mouse to draw your signature. On mobile, tap the button to open a signature pad.
                 </div>
                 <button type="button" id="open-signature-modal">Open Signature Pad</button>
                 <canvas id="signature-pad" width="400" height="150" aria-label="Draw your signature here"></canvas>
@@ -1317,10 +1310,10 @@
         </div>
         <div id="signature-modal">
             <div id="modal-instructions" aria-live="polite">
-                Please rotate your device to landscape mode and touch the canvas to draw your signature.
+                Touch to draw your signature.
             </div>
             <div id="modal-orientation-prompt" aria-live="assertive">
-                Please rotate your device to landscape mode to sign.
+                Rotate to landscape for a larger signature area.
             </div>
             <canvas id="modal-canvas"></canvas>
             <div id="modal-buttons">
