@@ -138,7 +138,7 @@
             text-align: center;
         }
         .location {
-            margin-bottom: 20px;
+            margin-bottom: 0px;
         }
         #gpo_options, #dist_options, #other_pricing {
             text-align: center;
@@ -153,6 +153,11 @@
             visibility: visible;
             touch-action: none;
             z-index: 1001;
+        }
+
+        #localized_message, #payment_terms_no_message {
+    color: #00FFFF; /* Changed to cyan */
+        
         }
         #mobile-signature-pad {
             border: 2px solid #666;
@@ -269,6 +274,7 @@
                 max-width: 300px;
             }
             #notes {
+                margin-top: 20px;
                 max-width: 300px;
             }
             input[name^="delivery_hours"] {
