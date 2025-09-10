@@ -136,9 +136,9 @@
             max-width: 400px;
             height: 150px;
             display: block;
-            touch-action: none; /* Prevent browser touch actions like zooming */
+            touch-action: none;
         }
-        #mobile-signature {
+        #open-signature-modal {
             display: none;
         }
         #signature-section {
@@ -218,7 +218,48 @@
             margin-top: 5px;
             display: block;
         }
-        /* Improved Mobile Responsiveness */
+        /* Modal Styles */
+        #signature-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #222;
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #modal-canvas {
+            border: 1px solid #666;
+            background-color: #222;
+            width: 100%;
+            height: calc(100% - 120px);
+            touch-action: none;
+        }
+        #modal-instructions {
+            color: #ccc;
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        #modal-orientation-prompt {
+            color: #ff5555;
+            font-size: 16px;
+            margin-bottom: 10px;
+            display: none;
+            text-align: center;
+        }
+        /* Mobile Responsiveness */
         @media (max-width: 600px) {
             form {
                 margin: 20px;
@@ -229,17 +270,10 @@
                 max-width: 200px;
             }
             #signature-pad {
-                width: 100%;
-                max-width: 280px; /* Slightly smaller for better touch precision */
-                height: 120px; /* Adjusted for mobile */
+                display: none;
             }
-            #mobile-signature {
-                width: 100%;
-                max-width: 280px;
-                padding: 5px;
-                color: white;
-                background-color: #444;
-                border: 1px solid #666;
+            #open-signature-modal {
+                display: block;
             }
             #customer_name {
                 max-width: 300px;
@@ -253,6 +287,26 @@
             button {
                 padding: 8px 16px;
                 font-size: 14px;
+            }
+        }
+        /* Enforce Landscape for Modal */
+        @media (max-width: 600px) and (orientation: portrait) {
+            #signature-modal {
+                display: flex;
+            }
+            #modal-canvas {
+                display: none;
+            }
+            #modal-orientation-prompt {
+                display: block;
+            }
+        }
+        @media (max-width: 600px) and (orientation: landscape) {
+            #modal-canvas {
+                display: block;
+            }
+            #modal-orientation-prompt {
+                display: none;
             }
         }
     </style>
@@ -402,7 +456,7 @@
                         inputs[j].setAttribute('required', 'required');
                     }
                     if (inputs[j].name.startsWith('liftgate') || inputs[j].name.startsWith('appt')) {
-                        inputs[j].setAttribute('required', 'required');
+                        inputs[i].setAttribute('required', 'required');
                     }
                 }
                 var label = locations[i].querySelector('label[for^="delivery_hours"]');
@@ -528,30 +582,18 @@
                 }
             });
 
-            // Validate signature (canvas or mobile input)
-            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            const canvas = document.getElementById('signature-pad');
-            const mobileSignature = document.getElementById('mobile-signature');
-            if (isMobile && mobileSignature && mobileSignature.value.trim()) {
-                // Use mobile signature input if filled
-                document.getElementById('signature-data').value = mobileSignature.value;
-            } else {
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const isCanvasEmpty = imageData.every((val, index) => index % 4 === 3 ? val === 255 : val === 0);
-                if (isCanvasEmpty) {
-                    isValid = false;
-                    const signatureError = document.createElement('span');
-                    signatureError.className = 'form-error signature-feedback';
-                    signatureError.textContent = 'Please provide a signature.';
-                    signatureError.setAttribute('role', 'alert');
-                    const signatureSection = document.getElementById('signature-section');
-                    if (!signatureSection.querySelector('.signature-feedback')) {
-                        signatureSection.appendChild(signatureError);
-                        setTimeout(() => signatureError.remove(), 3000);
-                    }
-                } else {
-                    document.getElementById('signature-data').value = canvas.toDataURL('image/png');
+            // Validate signature
+            const signatureData = document.getElementById('signature-data').value;
+            if (!signatureData) {
+                isValid = false;
+                const signatureError = document.createElement('span');
+                signatureError.className = 'form-error signature-feedback';
+                signatureError.textContent = 'Please provide a signature.';
+                signatureError.setAttribute('role', 'alert');
+                const signatureSection = document.getElementById('signature-section');
+                if (!signatureSection.querySelector('.signature-feedback')) {
+                    signatureSection.appendChild(signatureError);
+                    setTimeout(() => signatureError.remove(), 3000);
                 }
             }
 
@@ -560,28 +602,30 @@
 
         window.onload = function() {
             const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            const canvas = document.getElementById('signature-pad');
-            const mobileSignature = document.getElementById('mobile-signature');
             const signatureSection = document.getElementById('signature-section');
-
-            // Show/hide canvas vs mobile signature input
-            if (isMobile) {
-                canvas.style.display = 'none';
-                mobileSignature.style.display = 'block';
-                mobileSignature.setAttribute('aria-label', 'Type your signature or upload a signature image');
-            } else {
-                canvas.style.display = 'block';
-                mobileSignature.style.display = 'none';
-            }
-
-            const ctx = canvas.getContext('2d');
+            const signaturePad = document.getElementById('signature-pad');
+            const signatureButton = document.getElementById('open-signature-modal');
+            const signatureModal = document.getElementById('signature-modal');
+            const modalCanvas = document.getElementById('modal-canvas');
+            const modalOrientationPrompt = document.getElementById('modal-orientation-prompt');
+            const ctx = signaturePad.getContext('2d');
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
+            let modalCtx = modalCanvas ? modalCanvas.getContext('2d') : null;
             let isDrawing = false;
             let lastX = 0;
             let lastY = 0;
 
-            // Debounce function for resize (better for orientation changes)
+            // Show/hide signature pad vs modal button
+            if (isMobile) {
+                signaturePad.style.display = 'none';
+                signatureButton.style.display = 'block';
+            } else {
+                signaturePad.style.display = 'block';
+                signatureButton.style.display = 'none';
+            }
+
+            // Debounce function for resize
             function debounce(fn, wait) {
                 let timeout;
                 return function (...args) {
@@ -590,98 +634,190 @@
                 };
             }
 
-            // Resize canvas for responsiveness
+            // Resize desktop canvas
             function resizeCanvas() {
-                const rect = canvas.getBoundingClientRect();
+                const rect = signaturePad.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                canvas.width = rect.width * dpr;
-                canvas.height = rect.height * dpr;
+                signaturePad.width = rect.width * dpr;
+                signaturePad.height = rect.height * dpr;
                 ctx.scale(dpr, dpr);
                 ctx.strokeStyle = '#ffffff';
-                canvas.style.width = rect.width + 'px';
-                canvas.style.height = rect.height + 'px';
+                signaturePad.style.width = rect.width + 'px';
+                signaturePad.style.height = rect.height + 'px';
             }
 
-            // Improved Signature Pad Accessibility
-            canvas.setAttribute('tabindex', '0');
-            canvas.setAttribute('aria-label', 'Draw your signature here');
-            canvas.setAttribute('role', 'application');
-            canvas.setAttribute('aria-describedby', 'signature-instructions');
-            canvas.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+            // Resize modal canvas
+            function resizeModalCanvas() {
+                if (!modalCanvas) return;
+                const rect = modalCanvas.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                modalCanvas.width = rect.width * dpr;
+                modalCanvas.height = rect.height * dpr;
+                modalCtx.scale(dpr, dpr);
+                modalCtx.strokeStyle = '#ffffff';
+                modalCanvas.style.width = rect.width + 'px';
+                modalCanvas.style.height = rect.height + 'px';
+            }
+
+            // Check orientation
+            function checkOrientation() {
+                if (!isMobile || !modalOrientationPrompt) return;
+                const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+                modalOrientationPrompt.style.display = isLandscape ? 'none' : 'block';
+                modalCanvas.style.display = isLandscape ? 'block' : 'none';
+            }
+
+            // Desktop signature pad events
+            if (!isMobile) {
+                window.addEventListener('resize', debounce(resizeCanvas, 100));
+                resizeCanvas();
+
+                signaturePad.setAttribute('tabindex', '0');
+                signaturePad.setAttribute('aria-label', 'Draw your signature here');
+                signaturePad.setAttribute('role', 'application');
+                signaturePad.setAttribute('aria-describedby', 'signature-instructions');
+                signaturePad.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        const feedback = document.createElement('span');
+                        feedback.className = 'signature-feedback';
+                        feedback.textContent = 'Please use a mouse to draw your signature.';
+                        feedback.style.color = '#ff5555';
+                        feedback.setAttribute('role', 'alert');
+                        if (!signatureSection.querySelector('.signature-feedback')) {
+                            signatureSection.appendChild(feedback);
+                            setTimeout(() => feedback.remove(), 3000);
+                        }
+                    }
+                });
+
+                signaturePad.addEventListener('mousedown', (e) => {
+                    isDrawing = true;
+                    const rect = signaturePad.getBoundingClientRect();
+                    lastX = e.clientX - rect.left;
+                    lastY = e.clientY - rect.top;
+                });
+                signaturePad.addEventListener('mousemove', (e) => {
+                    if (isDrawing) {
+                        const rect = signaturePad.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        ctx.beginPath();
+                        ctx.moveTo(lastX, lastY);
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                        lastX = x;
+                        lastY = y;
+                    }
+                });
+                signaturePad.addEventListener('mouseup', () => isDrawing = false);
+                signaturePad.addEventListener('mouseout', () => isDrawing = false);
+            }
+
+            // Mobile signature modal events
+            if (isMobile && modalCanvas) {
+                modalCtx.strokeStyle = '#ffffff';
+                modalCtx.lineWidth = 2;
+
+                window.addEventListener('resize', debounce(resizeModalCanvas, 100));
+                window.addEventListener('orientationchange', checkOrientation);
+                resizeModalCanvas();
+                checkOrientation();
+
+                modalCanvas.setAttribute('tabindex', '0');
+                modalCanvas.setAttribute('aria-label', 'Draw your signature here');
+                modalCanvas.setAttribute('role', 'application');
+                modalCanvas.setAttribute('aria-describedby', 'modal-instructions');
+                modalCanvas.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        const feedback = document.createElement('span');
+                        feedback.className = 'signature-feedback';
+                        feedback.textContent = 'Please use touch to draw your signature.';
+                        feedback.style.color = '#ff5555';
+                        feedback.setAttribute('role', 'alert');
+                        if (!signatureModal.querySelector('.signature-feedback')) {
+                            signatureModal.appendChild(feedback);
+                            setTimeout(() => feedback.remove(), 3000);
+                        }
+                    }
+                });
+
+                modalCanvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = modalCanvas.getBoundingClientRect();
+                    isDrawing = true;
+                    lastX = (touch.clientX - rect.left - window.scrollX) * (modalCanvas.width / rect.width);
+                    lastY = (touch.clientY - rect.top - window.scrollY) * (modalCanvas.height / rect.height);
+                });
+                modalCanvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    if (isDrawing) {
+                        const touch = e.touches[0];
+                        const rect = modalCanvas.getBoundingClientRect();
+                        const x = (touch.clientX - rect.left - window.scrollX) * (modalCanvas.width / rect.width);
+                        const y = (touch.clientY - rect.top - window.scrollY) * (modalCanvas.height / rect.height);
+                        modalCtx.beginPath();
+                        modalCtx.moveTo(lastX, lastY);
+                        modalCtx.lineTo(x, y);
+                        modalCtx.stroke();
+                        lastX = x;
+                        lastY = y;
+                    }
+                });
+                modalCanvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    isDrawing = false;
+                });
+                modalCanvas.addEventListener('touchcancel', (e) => {
+                    e.preventDefault();
+                    isDrawing = false;
+                });
+
+                // Modal open/close
+                signatureButton.addEventListener('click', () => {
+                    signatureModal.style.display = 'flex';
+                    checkOrientation();
+                    resizeModalCanvas();
+                    modalCanvas.focus();
+                });
+
+                document.getElementById('save-signature').addEventListener('click', () => {
+                    const signatureData = modalCanvas.toDataURL('image/png');
+                    document.getElementById('signature-data').value = signatureData;
+                    const img = new Image();
+                    img.src = signatureData;
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0, signaturePad.width, signaturePad.height);
+                    };
+                    signatureModal.style.display = 'none';
                     const feedback = document.createElement('span');
-                    feedback.className = 'signature-feedback';
-                    feedback.textContent = 'Please use a mouse or touch to draw your signature.';
-                    feedback.style.color = '#ff5555';
-                    feedback.setAttribute('role', 'alert');
+                    feedback.className = 'form-success signature-feedback';
+                    feedback.textContent = 'Signature saved.';
+                    feedback.setAttribute('role', 'status');
                     if (!signatureSection.querySelector('.signature-feedback')) {
                         signatureSection.appendChild(feedback);
-                        setTimeout(() => feedback.remove(), 3000);
+                        setTimeout(() => feedback.remove(), 2000);
                     }
-                }
-            });
+                });
 
-            window.addEventListener('resize', debounce(resizeCanvas, 100));
-            resizeCanvas();
+                document.getElementById('close-signature-modal').addEventListener('click', () => {
+                    signatureModal.style.display = 'none';
+                });
 
-            canvas.addEventListener('mousedown', (e) => {
-                isDrawing = true;
-                const rect = canvas.getBoundingClientRect();
-                lastX = e.clientX - rect.left;
-                lastY = e.clientY - rect.top;
-            });
-            canvas.addEventListener('mousemove', (e) => {
-                if (isDrawing) {
-                    const rect = canvas.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                    ctx.lineTo(x, y);
-                    ctx.stroke();
-                    lastX = x;
-                    lastY = y;
-                }
-            });
-            canvas.addEventListener('mouseup', () => isDrawing = false);
-            canvas.addEventListener('mouseout', () => isDrawing = false);
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const rect = canvas.getBoundingClientRect();
-                isDrawing = true;
-                lastX = (touch.clientX - rect.left - window.scrollX) * (canvas.width / rect.width);
-                lastY = (touch.clientY - rect.top - window.scrollY) * (canvas.height / rect.height);
-            });
-            canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (isDrawing) {
-                    const touch = e.touches[0];
-                    const rect = canvas.getBoundingClientRect();
-                    const x = (touch.clientX - rect.left - window.scrollX) * (canvas.width / rect.width);
-                    const y = (touch.clientY - rect.top - window.scrollY) * (canvas.height / rect.height);
-                    ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                    ctx.lineTo(x, y);
-                    ctx.stroke();
-                    lastX = x;
-                    lastY = y;
-                }
-            });
-            canvas.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                isDrawing = false;
-            });
-            canvas.addEventListener('touchcancel', (e) => {
-                e.preventDefault();
-                isDrawing = false;
-            });
+                // Close modal with Esc key
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && signatureModal.style.display === 'flex') {
+                        signatureModal.style.display = 'none';
+                    }
+                });
+            }
 
             document.getElementById('clear-signature').addEventListener('click', () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+                if (modalCtx) modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
                 document.getElementById('signature-data').value = '';
-                mobileSignature.value = '';
                 ctx.strokeStyle = '#ffffff';
+                if (modalCtx) modalCtx.strokeStyle = '#ffffff';
                 const feedback = document.createElement('span');
                 feedback.className = 'form-success signature-feedback';
                 feedback.textContent = 'Signature cleared.';
@@ -692,7 +828,7 @@
                 }
             });
 
-            // Improved Form Submission
+            // Form submission
             document.querySelector('form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!validateForm()) {
@@ -716,8 +852,8 @@
                         form.appendChild(successMsg);
                         setTimeout(() => successMsg.remove(), 3000);
                         form.reset();
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        mobileSignature.value = '';
+                        ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
+                        if (modalCtx) modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
                         document.getElementById('signature-data').value = '';
                     } else {
                         throw new Error('Submission failed');
@@ -792,13 +928,7 @@
             }
             const locations = document.getElementById('locations').getElementsByClassName('location').length;
             data['num_locations'] = locations;
-            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-            if (!isMobile) {
-                const canvas = document.getElementById('signature-pad');
-                data['signature'] = canvas.toDataURL('image/png');
-            } else {
-                data['signature'] = document.getElementById('mobile-signature').value;
-            }
+            data['signature'] = document.getElementById('signature-data').value;
             localStorage.setItem('customerIntakeForm', JSON.stringify(data));
             const feedback = document.createElement('span');
             feedback.className = 'form-success';
@@ -845,18 +975,13 @@
             }
             updateSingleBillingVisibility();
             showSingleBillingMessage();
-            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             if (data['signature']) {
-                if (!isMobile) {
-                    const ctx = document.getElementById('signature-pad').getContext('2d');
-                    const img = new Image();
-                    img.src = data['signature'];
-                    img.onload = () => {
-                        ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
-                    };
-                } else {
-                    document.getElementById('mobile-signature').value = data['signature'];
-                }
+                const ctx = document.getElementById('signature-pad').getContext('2d');
+                const img = new Image();
+                img.src = data['signature'];
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
+                };
             }
             updateAccountsPayableVisibility();
             updateW9Display();
@@ -879,9 +1004,13 @@
             document.getElementById('single_billing_message').style.display = 'none';
             document.getElementById('multi_location_message').style.display = 'none';
             const ctx = document.getElementById('signature-pad').getContext('2d');
-            ctx.clearRect(0, 0, ctx.canvas.width, canvas.height);
-            ctx.strokeStyle = '#ffffff';
-            document.getElementById('mobile-signature').value = '';
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            const modalCanvas = document.getElementById('modal-canvas');
+            if (modalCanvas) {
+                const modalCtx = modalCanvas.getContext('2d');
+                modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+            }
+            document.getElementById('signature-data').value = '';
             const feedback = document.createElement('span');
             feedback.className = 'form-success';
             feedback.textContent = 'Form cleared!';
@@ -1142,12 +1271,25 @@
             <div class="signature-container">
                 <label for="signature-pad">Signature (Required):</label>
                 <div id="signature-instructions" style="color: #ccc; font-size: 12px; margin-bottom: 5px;">
-                    On desktop, use your mouse to draw your signature. On mobile, type your name or upload a signature image.
+                    On desktop, use your mouse to draw your signature. On mobile, tap the button to open a full-screen signature pad.
                 </div>
+                <button type="button" id="open-signature-modal">Open Signature Pad</button>
                 <canvas id="signature-pad" width="400" height="150" aria-label="Draw your signature here"></canvas>
-                <input type="text" id="mobile-signature" name="mobile-signature" placeholder="Type your signature" style="display: none;" aria-label="Type your signature or upload a signature image">
                 <input type="hidden" id="signature-data" name="signature" value="">
                 <button type="button" id="clear-signature">Clear Signature</button>
+            </div>
+        </div>
+        <div id="signature-modal">
+            <div id="modal-instructions" aria-live="polite">
+                Please rotate your device to landscape mode and use your finger or stylus to draw your signature.
+            </div>
+            <div id="modal-orientation-prompt" aria-live="assertive">
+                Please rotate your device to landscape mode to sign.
+            </div>
+            <canvas id="modal-canvas"></canvas>
+            <div id="modal-buttons">
+                <button type="button" id="save-signature">Save Signature</button>
+                <button type="button" id="close-signature-modal">Close</button>
             </div>
         </div>
         <button type="button" id="save-form">Save</button>
