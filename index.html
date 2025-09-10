@@ -112,6 +112,9 @@
         div {
             margin-bottom: 15px;
         }
+        #notes-section {
+            margin-top: 20px; /* 20px gap from Add More Locations button */
+        }
         label, input, select, textarea {
             display: inline-block;
             text-align: center;
@@ -138,7 +141,7 @@
             text-align: center;
         }
         .location {
-            margin-bottom: 0px;
+            margin-bottom: 0; /* Reduced to bring Add More Locations button closer */
         }
         #gpo_options, #dist_options, #other_pricing {
             text-align: center;
@@ -153,11 +156,6 @@
             visibility: visible;
             touch-action: none;
             z-index: 1001;
-        }
-
-        #localized_message, #payment_terms_no_message {
-    color: #00FFFF; /* Changed to cyan */
-        
         }
         #mobile-signature-pad {
             border: 2px solid #666;
@@ -223,6 +221,9 @@
         .tax-exempt-message, .payment-terms-message {
             color: #00FFFF;
         }
+        #localized_message, #payment_terms_no_message {
+            color: #00FFFF; /* Changed to cyan */
+        }
         .logo-container {
             margin-bottom: 10px;
             text-align: center;
@@ -234,7 +235,7 @@
             display: block;
             margin: 0 auto;
         }
-        #multi_location_message {
+        #multi_location_message, #centralized_message, #single_billing_message {
             color: green;
         }
         .accounts-payable {
@@ -274,7 +275,6 @@
                 max-width: 300px;
             }
             #notes {
-                margin-top: 20px;
                 max-width: 300px;
             }
             input[name^="delivery_hours"] {
@@ -285,7 +285,7 @@
                 font-size: 14px;
             }
             .signature-buttons {
-                flex-direction: column; /* Stack buttons vertically on mobile for better spacing */
+                flex-direction: column; /* Stack buttons vertically on mobile */
                 gap: 5px;
             }
         }
@@ -813,8 +813,8 @@
                     const touch = e.touches[0];
                     const rect = mobileSignaturePad.getBoundingClientRect();
                     isDrawing = true;
-                    lastX = touch.clientX - rect.left;
-                    lastY = touch.clientY - rect.top;
+                    lastX = e.clientX - rect.left;
+                    lastY = e.clientY - rect.top;
                     console.log('Mobile touchstart:', { x: lastX, y: lastY });
                     mobileCtx.beginPath();
                     mobileCtx.arc(lastX, lastY, 1, 0, 2 * Math.PI);
@@ -1191,7 +1191,7 @@
             <div id="centralized_message" style="display:none; color:green;">
                 By selecting this field RG will set up your location as a sub-account and send invoices to your parent company
             </div>
-            <div id="localized_message" style="display:none; color:red;">
+            <div id="localized_message" style="display:none; color:#00FFFF;">
                 In the primary information below please provide information relevant to your specific location
             </div>
         </div>
@@ -1219,7 +1219,7 @@
         <div id="payment_terms_message" class="payment-terms-message" style="display:none;">
             Please provide a credit reference form to your rep
         </div>
-        <div id="payment_terms_no_message" style="display:none; color:red;">
+        <div id="payment_terms_no_message" style="display:none; color:#00FFFF;">
             By default customers are set up with Due On Receipt and can pay with check, card, or ACH link prior to or upon delivery
         </div>
         <div class="dropdown-group">
@@ -1370,7 +1370,7 @@
             </div>
         </div>
         <button type="button" onclick="addLocation()">Add More Locations</button>
-        <div>
+        <div id="notes-section">
             <label for="notes">Special Account Notes:</label><br>
             <textarea id="notes" name="notes" maxlength="200" aria-label="Special Account Notes"></textarea>
             <h6 class="w9-message">Please provide an up to date W-9</h6>
