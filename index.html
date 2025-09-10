@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -137,6 +136,7 @@
             max-width: 400px;
             height: 150px;
             display: block;
+            cursor: crosshair;
         }
         #signature-section {
             margin-top: 20px;
@@ -203,6 +203,35 @@
         .accounts-payable.hidden {
             display: none;
         }
+        /* Improved Mobile Responsiveness */
+        @media (max-width: 600px) {
+            form {
+                margin: 20px;
+                padding: 15px;
+            }
+            .row input {
+                min-width: 100px;
+                max-width: 200px;
+            }
+            #signature-pad {
+                width: 100%;
+                max-width: 300px;
+                height: 100px;
+            }
+            #customer_name {
+                max-width: 300px;
+            }
+            #notes {
+                max-width: 300px;
+            }
+            input[name^="delivery_hours"] {
+                width: 200px;
+            }
+            button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
     </style>
     <script>
         function updateAccountsPayableVisibility() {
@@ -210,20 +239,18 @@
             const rgSetupYes = document.getElementById('rg_setup_yes')?.checked || false;
             const billingCentralized = document.getElementById('billing_centralized')?.checked || false;
             const apSections = document.querySelectorAll('.accounts-payable');
-            
+           
             if (multiLocationYes && rgSetupYes && billingCentralized) {
                 apSections.forEach(section => section.classList.add('hidden'));
             } else {
                 apSections.forEach(section => section.classList.remove('hidden'));
             }
         }
-
         function addLocation() {
             var locations = document.getElementById('locations');
             var count = locations.getElementsByClassName('location').length;
             var singleBillingYes = document.getElementById('single_billing_yes')?.checked || false;
             var newLoc;
-
             if (singleBillingYes) {
                 newLoc = document.createElement('div');
                 newLoc.className = 'location';
@@ -269,18 +296,18 @@
                     <div class="radio-group">
                         <label>Liftgate Required?</label>
                         <div class="radio-buttons">
-                            <input type="radio" id="liftgate_yes[${count}]" name="liftgate[${count}]" value="yes" required> 
+                            <input type="radio" id="liftgate_yes[${count}]" name="liftgate[${count}]" value="yes" required>
                             <label for="liftgate_yes[${count}]">Yes</label>
-                            <input type="radio" id="liftgate_no[${count}]" name="liftgate[${count}]" value="no"> 
+                            <input type="radio" id="liftgate_no[${count}]" name="liftgate[${count}]" value="no">
                             <label for="liftgate_no[${count}]">No</label>
                         </div>
                     </div>
                     <div class="radio-group">
                         <label>Delivery Appointment Required?</label>
                         <div class="radio-buttons">
-                            <input type="radio" id="appt_yes[${count}]" name="appt[${count}]" value="yes" required> 
+                            <input type="radio" id="appt_yes[${count}]" name="appt[${count}]" value="yes" required>
                             <label for="appt_yes[${count}]">Yes</label>
-                            <input type="radio" id="appt_no[${count}]" name="appt[${count}]" value="no"> 
+                            <input type="radio" id="appt_no[${count}]" name="appt[${count}]" value="no">
                             <label for="appt_no[${count}]">No</label>
                         </div>
                     </div>
@@ -316,17 +343,15 @@
                     label.setAttribute('for', 'delivery_hours[' + count + ']');
                 }
             }
-
             var removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.textContent = 'Remove Location';
             removeBtn.onclick = function() { removeLocation(this); };
             newLoc.appendChild(removeBtn);
-            
+           
             locations.appendChild(newLoc);
             updateAccountsPayableVisibility();
         }
-
         function removeLocation(button) {
             var locations = document.getElementById('locations');
             if (locations.getElementsByClassName('location').length > 1) {
@@ -335,7 +360,6 @@
                 updateAccountsPayableVisibility();
             }
         }
-
         function updateLocationHeaders() {
             var locations = document.getElementById('locations').getElementsByClassName('location');
             for (var i = 0; i < locations.length; i++) {
@@ -366,23 +390,18 @@
             }
             updateAccountsPayableVisibility();
         }
-
         function showGpoOptions() {
             document.getElementById('gpo_options').style.display = 'block';
         }
-
         function hideGpoOptions() {
             document.getElementById('gpo_options').style.display = 'none';
         }
-
         function showDistOptions() {
             document.getElementById('dist_options').style.display = 'block';
         }
-
         function hideDistOptions() {
             document.getElementById('dist_options').style.display = 'none';
         }
-
         function checkOther(select) {
             if (select.value === 'other') {
                 document.getElementById('other_pricing').style.display = 'block';
@@ -390,14 +409,12 @@
                 document.getElementById('other_pricing').style.display = 'none';
             }
         }
-
         function showNetworkSetup() {
             document.getElementById('network_setup').style.display = 'block';
             document.getElementById('multi_location_message').style.display = 'block';
             updateSingleBillingVisibility();
             updateW9Display();
         }
-
         function hideNetworkSetup() {
             document.getElementById('network_setup').style.display = 'none';
             document.getElementById('multi_location_message').style.display = 'none';
@@ -405,38 +422,32 @@
             updateSingleBillingVisibility();
             updateW9Display();
         }
-
         function showBillingType() {
             document.getElementById('billing_type').style.display = 'block';
             updateSingleBillingVisibility();
             updateW9Display();
         }
-
         function hideBillingType() {
             document.getElementById('billing_type').style.display = 'none';
             hideBillingMessages();
             updateSingleBillingVisibility();
             updateW9Display();
         }
-
         function showLocalizedMessage() {
             document.getElementById('localized_message').style.display = 'block';
             document.getElementById('centralized_message').style.display = 'none';
             updateW9Display();
         }
-
         function showCentralizedMessage() {
             document.getElementById('centralized_message').style.display = 'block';
             document.getElementById('localized_message').style.display = 'none';
             updateW9Display();
         }
-
         function hideBillingMessages() {
             document.getElementById('localized_message').style.display = 'none';
             document.getElementById('centralized_message').style.display = 'none';
             updateW9Display();
         }
-
         function updateSingleBillingVisibility() {
             const multiLocationYes = document.getElementById('multi_location_yes').checked;
             const rgSetupNo = document.getElementById('rg_setup_no')?.checked || false;
@@ -448,7 +459,6 @@
             if (singleBillingMessage) singleBillingMessage.style.display = 'none';
             updateAccountsPayableVisibility();
         }
-
         function showSingleBillingMessage() {
             const singleBillingMessage = document.getElementById('single_billing_message');
             if (singleBillingMessage) {
@@ -456,24 +466,20 @@
             }
             updateAccountsPayableVisibility();
         }
-
         function updateW9Display() {
             const w9Message = document.querySelector('.w9-message');
             if (!w9Message) return;
-
             const multiLocationYes = document.getElementById('multi_location_yes').checked;
             const multiLocationNo = document.getElementById('multi_location_no').checked;
             const rgSetupYes = document.getElementById('rg_setup_yes')?.checked || false;
             const rgSetupNo = document.getElementById('rg_setup_no')?.checked || false;
             const billingLocalized = document.getElementById('billing_localized')?.checked || false;
-
             if ((multiLocationYes && rgSetupNo) || multiLocationNo || (multiLocationYes && rgSetupYes && billingLocalized)) {
                 w9Message.style.display = 'block';
             } else {
                 w9Message.style.display = 'none';
             }
         }
-
         window.onload = function() {
             const canvas = document.getElementById('signature-pad');
             const ctx = canvas.getContext('2d');
@@ -483,6 +489,18 @@
             let lastX = 0;
             let lastY = 0;
 
+            // Throttle function to optimize resize performance
+            function throttle(fn, wait) {
+                let lastCall = 0;
+                return function (...args) {
+                    const now = new Date().getTime();
+                    if (now - lastCall < wait) return;
+                    lastCall = now;
+                    return fn(...args);
+                };
+            }
+
+            // Resize canvas for responsiveness
             function resizeCanvas() {
                 const rect = canvas.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
@@ -493,14 +511,34 @@
                 canvas.style.width = rect.width + 'px';
                 canvas.style.height = rect.height + 'px';
             }
-            window.addEventListener('resize', resizeCanvas);
+
+            // Improved Signature Pad Accessibility
+            canvas.setAttribute('tabindex', '0');
+            canvas.setAttribute('aria-label', 'Draw your signature here');
+            canvas.setAttribute('role', 'application');
+            canvas.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    const feedback = document.createElement('span');
+                    feedback.className = 'signature-feedback';
+                    feedback.textContent = 'Please use a mouse or touch to draw your signature.';
+                    feedback.style.color = '#ff5555';
+                    feedback.style.fontSize = '14px';
+                    feedback.setAttribute('role', 'alert');
+                    const signatureSection = document.getElementById('signature-section');
+                    if (!signatureSection.querySelector('.signature-feedback')) {
+                        signatureSection.appendChild(feedback);
+                        setTimeout(() => feedback.remove(), 3000);
+                    }
+                }
+            });
+
+            window.addEventListener('resize', throttle(resizeCanvas, 100));
             resizeCanvas();
 
             canvas.addEventListener('mousedown', (e) => {
                 isDrawing = true;
                 [lastX, lastY] = [e.offsetX, e.offsetY];
             });
-
             canvas.addEventListener('mousemove', (e) => {
                 if (isDrawing) {
                     ctx.beginPath();
@@ -510,10 +548,8 @@
                     [lastX, lastY] = [e.offsetX, e.offsetY];
                 }
             });
-
             canvas.addEventListener('mouseup', () => isDrawing = false);
             canvas.addEventListener('mouseout', () => isDrawing = false);
-
             canvas.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -521,7 +557,6 @@
                 isDrawing = true;
                 [lastX, lastY] = [(touch.clientX - rect.left) * (canvas.width / rect.width), (touch.clientY - rect.top) * (canvas.height / rect.height)];
             });
-
             canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 if (isDrawing) {
@@ -536,13 +571,23 @@
                     [lastX, lastY] = [x, y];
                 }
             });
-
             canvas.addEventListener('touchend', () => isDrawing = false);
 
             document.getElementById('clear-signature').addEventListener('click', () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 document.getElementById('signature-data').value = '';
                 ctx.strokeStyle = '#ffffff';
+                const feedback = document.createElement('span');
+                feedback.className = 'signature-feedback';
+                feedback.textContent = 'Signature cleared.';
+                feedback.style.color = '#00ff00';
+                feedback.style.fontSize = '14px';
+                feedback.setAttribute('role', 'status');
+                const signatureSection = document.getElementById('signature-section');
+                if (!signatureSection.querySelector('.signature-feedback')) {
+                    signatureSection.appendChild(feedback);
+                    setTimeout(() => feedback.remove(), 2000);
+                }
             });
 
             document.querySelector('form').addEventListener('submit', (e) => {
@@ -550,11 +595,20 @@
                 const isCanvasEmpty = imageData.every((val, index) => index % 4 === 3 ? val === 255 : val === 0);
                 if (isCanvasEmpty) {
                     e.preventDefault();
-                    alert('Please provide a signature.');
+                    const feedback = document.createElement('span');
+                    feedback.className = 'signature-feedback';
+                    feedback.textContent = 'Please provide a signature.';
+                    feedback.style.color = '#ff5555';
+                    feedback.style.fontSize = '14px';
+                    feedback.setAttribute('role', 'alert');
+                    const signatureSection = document.getElementById('signature-section');
+                    if (!signatureSection.querySelector('.signature-feedback')) {
+                        signatureSection.appendChild(feedback);
+                        setTimeout(() => feedback.remove(), 3000);
+                    }
                     return;
                 }
-                const signatureData = canvas.toDataURL('image/png');
-                document.getElementById('signature-data').value = signatureData;
+                document.getElementById('signature-data').value = canvas.toDataURL('image/png');
             });
 
             document.getElementById('tax_exempt_yes').addEventListener('change', () => {
@@ -565,7 +619,6 @@
                 document.getElementById('tax_exempt_message').style.display = 'none';
                 updateW9Display();
             });
-
             document.getElementById('payment_terms_yes').addEventListener('change', () => {
                 document.getElementById('payment_terms_message').style.display = 'block';
                 document.getElementById('payment_terms_no_message').style.display = 'none';
@@ -576,7 +629,6 @@
                 document.getElementById('payment_terms_no_message').style.display = 'block';
                 updateW9Display();
             });
-
             document.getElementById('multi_location_yes').addEventListener('change', () => { showNetworkSetup(); updateW9Display(); });
             document.getElementById('multi_location_no').addEventListener('change', () => { hideNetworkSetup(); updateW9Display(); });
             document.getElementById('rg_setup_yes').addEventListener('change', () => {
@@ -597,15 +649,12 @@
             });
             document.getElementById('single_billing_yes').addEventListener('change', () => { showSingleBillingMessage(); updateW9Display(); });
             document.getElementById('single_billing_no').addEventListener('change', () => { showSingleBillingMessage(); updateW9Display(); });
-
             document.getElementById('save-form').addEventListener('click', saveForm);
             document.getElementById('clear-form').addEventListener('click', clearForm);
-
             loadForm();
             updateAccountsPayableVisibility();
             updateW9Display();
         };
-
         function saveForm() {
             const form = document.querySelector('form');
             const formData = new FormData(form);
@@ -627,7 +676,6 @@
             localStorage.setItem('customerIntakeForm', JSON.stringify(data));
             alert('Form saved!');
         }
-
         function loadForm() {
             const saved = localStorage.getItem('customerIntakeForm');
             if (!saved) return;
@@ -677,7 +725,6 @@
             updateAccountsPayableVisibility();
             updateW9Display();
         }
-
         function clearForm() {
             localStorage.removeItem('customerIntakeForm');
             document.querySelector('form').reset();
@@ -712,14 +759,12 @@
             <img src="your-logo-file.png" alt="Company Logo">
         </div>
         <h1>New Customer Intake Form</h1>
-
         <div>
             <label for="customer_name">Customer Name:</label><br>
             <input type="text" id="customer_name" name="customer_name" required aria-label="Customer Name">
             <br><br>
             <h6 class="w9-message">Please provide an up to date W-9</h6>
         </div>
-
         <div class="radio-group">
             <label>Are you a part of a multi-location entity?</label>
             <div class="radio-buttons">
@@ -760,26 +805,24 @@
                 In the primary information below please provide information relevant to your specific location
             </div>
         </div>
-
         <div class="radio-group">
             <label>Are you tax exempt?</label>
             <div class="radio-buttons">
-                <input type="radio" id="tax_exempt_yes" name="tax_exempt" value="yes" required> 
+                <input type="radio" id="tax_exempt_yes" name="tax_exempt" value="yes" required>
                 <label for="tax_exempt_yes">Yes</label>
-                <input type="radio" id="tax_exempt_no" name="tax_exempt" value="no"> 
+                <input type="radio" id="tax_exempt_no" name="tax_exempt" value="no">
                 <label for="tax_exempt_no">No</label>
             </div>
         </div>
         <div id="tax_exempt_message" class="tax-exempt-message" style="display:none;">
             Please provide a tax-exemption form to your rep
         </div>
-
         <div class="radio-group">
             <label>Payment Terms Requested:</label>
             <div class="radio-buttons">
-                <input type="radio" id="payment_terms_yes" name="payment_terms" value="yes" required> 
+                <input type="radio" id="payment_terms_yes" name="payment_terms" value="yes" required>
                 <label for="payment_terms_yes">Yes</label>
-                <input type="radio" id="payment_terms_no" name="payment_terms" value="no"> 
+                <input type="radio" id="payment_terms_no" name="payment_terms" value="no">
                 <label for="payment_terms_no">No</label>
             </div>
         </div>
@@ -789,7 +832,6 @@
         <div id="payment_terms_no_message" style="display:none; color:red;">
             By default customers are set up with Due On Receipt and can pay with check, card, or ACH link prior to or upon delivery
         </div>
-
         <div class="dropdown-group">
             <label for="rep">Who is the rep?</label>
             <div class="dropdown-field">
@@ -803,13 +845,12 @@
                 </select>
             </div>
         </div>
-
         <div class="radio-group">
             <label>Are you a member of a GPO?</label>
             <div class="radio-buttons">
-                <input type="radio" id="gpo_yes" name="gpo" value="yes" required onclick="showGpoOptions()"> 
+                <input type="radio" id="gpo_yes" name="gpo" value="yes" required onclick="showGpoOptions()">
                 <label for="gpo_yes">Yes</label>
-                <input type="radio" id="gpo_no" name="gpo" value="no" onclick="hideGpoOptions()"> 
+                <input type="radio" id="gpo_no" name="gpo" value="no" onclick="hideGpoOptions()">
                 <label for="gpo_no">No</label>
             </div>
         </div>
@@ -822,13 +863,12 @@
                 <option>Sodexo</option>
             </select>
         </div>
-
         <div class="radio-group">
             <label>Will you purchase from a distributor?</label>
             <div class="radio-buttons">
-                <input type="radio" id="distributor_yes" name="distributor" value="yes" required onclick="showDistOptions()"> 
+                <input type="radio" id="distributor_yes" name="distributor" value="yes" required onclick="showDistOptions()">
                 <label for="distributor_yes">Yes</label>
-                <input type="radio" id="distributor_no" name="distributor" value="no" onclick="hideDistOptions()"> 
+                <input type="radio" id="distributor_no" name="distributor" value="no" onclick="hideDistOptions()">
                 <label for="distributor_no">No</label>
             </div>
         </div>
@@ -842,7 +882,6 @@
             </select>
             <input type="text" id="dist_location" name="dist_location" maxlength="50" placeholder="Distributor Location Name or Number" aria-label="Distributor Location">
         </div>
-
         <div class="dropdown-group">
             <label for="pricing">What pricing structure is this customer?</label>
             <div class="dropdown-field">
@@ -860,20 +899,18 @@
         <div id="other_pricing" style="display:none;">
             <input type="text" name="other_pricing" maxlength="20" aria-label="Custom Pricing Structure">
         </div>
-
         <div id="single_billing" class="radio-group" style="display:none;">
             <label>Do you have a single billing point of contact?</label>
             <div class="radio-buttons">
-                <input type="radio" id="single_billing_yes" name="single_billing" value="yes" required> 
+                <input type="radio" id="single_billing_yes" name="single_billing" value="yes" required>
                 <label for="single_billing_yes">Yes</label>
-                <input type="radio" id="single_billing_no" name="single_billing" value="no"> 
+                <input type="radio" id="single_billing_no" name="single_billing" value="no">
                 <label for="single_billing_no">No</label>
             </div>
         </div>
         <div id="single_billing_message" style="display:none; color:green;">
             Please add additional locations below to provide billing and shipping information for each location
         </div>
-
         <div id="locations">
             <div class="location">
                 <h2>Primary Information</h2>
@@ -888,7 +925,6 @@
                         <input type="tel" name="purchasing_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Purchasing Contact Phone">
                     </div>
                 </div>
-
                 <div>
                     <label>Billing Address:</label>
                     <div class="row">
@@ -898,7 +934,6 @@
                         <input type="text" name="billing_zip[0]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" required aria-label="Billing Zip Code">
                     </div>
                 </div>
-
                 <div class="accounts-payable">
                     <label>Accounts Payable Contact:</label>
                     <div class="row">
@@ -910,7 +945,6 @@
                         <input type="tel" name="ap_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Accounts Payable Phone">
                     </div>
                 </div>
-
                 <div>
                     <label>Ship to Address:</label>
                     <div class="row">
@@ -920,7 +954,6 @@
                         <input type="text" name="ship_zip[0]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" required aria-label="Shipping Zip Code">
                     </div>
                 </div>
-
                 <div>
                     <label>Warehouse and/or Receiving Contact:</label>
                     <div class="row">
@@ -932,52 +965,45 @@
                         <input type="tel" name="warehouse_phone[0]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Warehouse Contact Phone">
                     </div>
                 </div>
-
                 <div class="dropdown-group">
                     <label for="delivery_hours[0]">Dock Availability:</label>
                     <div class="dropdown-field">
                         <input type="text" id="delivery_hours[0]" name="delivery_hours[0]" placeholder="Hours & Days" required aria-label="Dock Availability">
                     </div>
                 </div>
-
                 <div class="radio-group">
                     <label>Liftgate Required?</label>
                     <div class="radio-buttons">
-                        <input type="radio" id="liftgate_yes[0]" name="liftgate[0]" value="yes" required> 
+                        <input type="radio" id="liftgate_yes[0]" name="liftgate[0]" value="yes" required>
                         <label for="liftgate_yes[0]">Yes</label>
-                        <input type="radio" id="liftgate_no[0]" name="liftgate[0]" value="no"> 
+                        <input type="radio" id="liftgate_no[0]" name="liftgate[0]" value="no">
                         <label for="liftgate_no[0]">No</label>
                     </div>
                 </div>
-
                 <div class="radio-group">
                     <label>Delivery Appointment Required?</label>
                     <div class="radio-buttons">
-                        <input type="radio" id="appt_yes[0]" name="appt[0]" value="yes" required> 
+                        <input type="radio" id="appt_yes[0]" name="appt[0]" value="yes" required>
                         <label for="appt_yes[0]">Yes</label>
-                        <input type="radio" id="appt_no[0]" name="appt[0]" value="no"> 
+                        <input type="radio" id="appt_no[0]" name="appt[0]" value="no">
                         <label for="appt_no[0]">No</label>
                     </div>
                 </div>
             </div>
         </div>
-
         <button type="button" onclick="addLocation()">Add More Locations</button>
-
         <div>
             <label for="notes">Special Account Notes:</label><br>
             <textarea id="notes" name="notes" maxlength="200" aria-label="Special Account Notes"></textarea>
         </div>
-
         <div id="signature-section">
             <div class="signature-container">
                 <label for="signature-pad">Signature (Required):</label>
-                <canvas id="signature-pad" width="400" height="150" aria-label="Signature Pad"></canvas>
+                <canvas id="signature-pad" width="400" height="150" aria-label="Draw your signature here"></canvas>
                 <input type="hidden" id="signature-data" name="signature" value="">
                 <button type="button" id="clear-signature">Clear Signature</button>
             </div>
         </div>
-
         <button type="button" id="save-form">Save</button>
         <button type="button" id="clear-form">Clear</button>
         <button type="submit">Submit Form</button>
