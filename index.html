@@ -116,6 +116,7 @@
             border-radius: 5px;
             cursor: pointer;
             color: white;
+            z-index: 1001;
         }
         button:hover {
             background-color: #555;
@@ -144,8 +145,8 @@
             border: 2px solid #666;
             background-color: #222;
             width: 100%;
-            max-width: 600px;
-            height: 200px;
+            max-width: 400px; /* Reduced for smaller payload */
+            height: 150px;
             display: none;
             visibility: visible;
             touch-action: none;
@@ -510,8 +511,12 @@
 
         // Validate form fields
         function validateForm() {
+            console.log('Validating form');
             const form = document.querySelector('form');
             const inputs = form.querySelectorAll('input[required], select[required]');
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const signaturePad = document.getElementById('signature-pad');
+            const mobileSignaturePad = document.getElementById('mobile-signature-pad');
             let isValid = true;
 
             // Clear previous error messages
@@ -526,15 +531,19 @@
                     errorMsg.className = 'form-error';
                     errorMsg.textContent = `${input.getAttribute('aria-label')} is required.`;
                     input.parentNode.appendChild(errorMsg);
+                    console.log(`Validation failed: ${input.getAttribute('aria-label')} is empty`);
                 } else {
                     input.classList.remove('error');
                     input.setAttribute('aria-invalid', 'false');
                 }
             });
 
-            // Validate signature
-            const signatureData = document.getElementById('signature-data').value;
-            if (!signatureData) {
+            // Set and validate signature
+            const signatureDataInput = document.getElementById('signature-data');
+            const signatureData = isMobile ? mobileSignaturePad.toDataURL('image/png') : signaturePad.toDataURL('image/png');
+            signatureDataInput.value = signatureData;
+            console.log('Signature data set:', signatureData.substring(0, 50) + '...');
+            if (!signatureData || signatureData === 'data:,') {
                 isValid = false;
                 const signatureError = document.createElement('span');
                 signatureError.className = 'form-error signature-feedback';
@@ -545,16 +554,21 @@
                     signatureSection.appendChild(signatureError);
                     setTimeout(() => signatureError.remove(), 3000);
                 }
+                console.log('Validation failed: No signature provided');
             }
 
+            console.log('Validation result:', isValid);
             return isValid;
         }
 
         window.onload = function() {
+            console.log('Window loaded');
             const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             const signatureSection = document.getElementById('signature-section');
             const signaturePad = document.getElementById('signature-pad');
             const mobileSignaturePad = document.getElementById('mobile-signature-pad');
+            const signatureInstructions = document.getElementById('signature-instructions');
+            const mobileSignatureInstructions = document.getElementById('mobile-signature-instructions');
             const ctx = signaturePad.getContext('2d');
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
@@ -563,13 +577,17 @@
             let lastX = 0;
             let lastY = 0;
 
-            // Show/hide signature pads
+            // Show/hide signature pads and instructions
             if (isMobile) {
                 signaturePad.style.display = 'none';
                 mobileSignaturePad.style.display = 'block';
+                signatureInstructions.style.display = 'none';
+                mobileSignatureInstructions.style.display = 'block';
             } else {
                 signaturePad.style.display = 'block';
                 mobileSignaturePad.style.display = 'none';
+                signatureInstructions.style.display = 'block';
+                mobileSignatureInstructions.style.display = 'none';
             }
 
             // Debounce function for resize
@@ -667,6 +685,7 @@
                 signaturePad.addEventListener('mouseup', { handleEvent: (e) => {
                     isDrawing = false;
                     console.log('Desktop mouseup');
+                    document.getElementById('signature-data').value = signaturePad.toDataURL('image/png');
                 }, passive: false });
                 signaturePad.addEventListener('mouseout', { handleEvent: (e) => {
                     isDrawing = false;
@@ -701,7 +720,7 @@
                 }, passive: false });
 
                 mobileSignaturePad.addEventListener('touchstart', { handleEvent: (e) => {
-                    if (e.touches.length > 1) return; // Ignore multi-touch
+                    if (e.touches.length > 1) return;
                     e.preventDefault();
                     const touch = e.touches[0];
                     const rect = mobileSignaturePad.getBoundingClientRect();
@@ -746,6 +765,7 @@
             }
 
             document.getElementById('clear-signature').addEventListener('click', () => {
+                console.log('Clearing signature');
                 ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
                 if (mobileCtx) mobileCtx.clearRect(0, 0, mobileSignaturePad.width, mobileSignaturePad.height);
                 document.getElementById('signature-data').value = '';
@@ -763,28 +783,34 @@
             });
 
             // Form submission
-            document.querySelector('form').addEventListener('submit', async (e) => {
+            const form = document.querySelector('form');
+            form.addEventListener('submit', async (e) => {
                 e.preventDefault();
+                console.log('Submit event triggered');
                 if (!validateForm()) {
+                    console.log('Form validation failed');
                     return;
                 }
 
-                const form = document.querySelector('form');
                 const formData = new FormData(form);
+                console.log('FormData created');
 
-                // Ensure signature data is set before submission
-                if (isMobile && mobileSignaturePad) {
-                    document.getElementById('signature-data').value = mobileSignaturePad.toDataURL('image/png');
-                } else {
-                    document.getElementById('signature-data').value = signaturePad.toDataURL('image/png');
+                // Log FormData contents
+                for (let [key, value] of formData.entries()) {
+                    console.log(`FormData: ${key}=${typeof value === 'string' ? value.substring(0, 50) : '[non-string]'}`);
                 }
 
                 try {
-                    const response = await fetch(form.getAttribute('action') || '/.netlify/functions/submit-form', {
+                    console.log('Sending fetch request to:', form.getAttribute('action') || '/');
+                    const response = await fetch(form.getAttribute('action') || '/', {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        headers: {
+                            'Accept': 'application/json'
+                        }
                     });
 
+                    console.log('Fetch response status:', response.status);
                     if (response.ok) {
                         const successMsg = document.createElement('span');
                         successMsg.className = 'form-success';
@@ -796,19 +822,28 @@
                         ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
                         if (mobileCtx) mobileCtx.clearRect(0, 0, mobileSignaturePad.width, mobileSignaturePad.height);
                         document.getElementById('signature-data').value = '';
-                        console.log('Form submitted');
+                        console.log('Form submitted successfully');
                     } else {
-                        throw new Error('Submission failed');
+                        const errorText = await response.text();
+                        throw new Error(`Submission failed: ${response.status} ${response.statusText} - ${errorText}`);
                     }
                 } catch (error) {
+                    console.error('Form submission error:', error);
                     const errorMsg = document.createElement('span');
                     errorMsg.className = 'form-error';
-                    errorMsg.textContent = 'Error submitting form. Please try again.';
+                    errorMsg.textContent = `Error submitting form: ${error.message}. Please try again or contact support.`;
                     errorMsg.setAttribute('role', 'alert');
                     form.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 3000);
-                    console.error('Form submission error:', error);
+                    setTimeout(() => errorMsg.remove(), 5000);
+                    // Fallback to form.submit()
+                    console.log('Attempting fallback form submission');
+                    form.submit();
                 }
+            });
+
+            // Debug submit button click
+            document.getElementById('submit-form').addEventListener('click', () => {
+                console.log('Submit button clicked');
             });
 
             document.getElementById('tax_exempt_yes').addEventListener('change', () => {
@@ -856,6 +891,7 @@
             updateW9Display();
         };
         function saveForm() {
+            console.log('Saving form');
             const form = document.querySelector('form');
             const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             const signaturePad = document.getElementById('signature-pad');
@@ -875,6 +911,7 @@
             const locations = document.getElementById('locations').getElementsByClassName('location').length;
             data['num_locations'] = locations;
             data['signature'] = isMobile ? mobileSignaturePad.toDataURL('image/png') : signaturePad.toDataURL('image/png');
+            console.log('Saved signature data:', data['signature'].substring(0, 50) + '...');
             localStorage.setItem('customerIntakeForm', JSON.stringify(data));
             const feedback = document.createElement('span');
             feedback.className = 'form-success';
@@ -882,8 +919,10 @@
             feedback.setAttribute('role', 'status');
             form.appendChild(feedback);
             setTimeout(() => feedback.remove(), 2000);
+            console.log('Form saved to localStorage');
         }
         function loadForm() {
+            console.log('Loading form');
             const saved = localStorage.getItem('customerIntakeForm');
             if (!saved) return;
             const data = JSON.parse(saved);
@@ -933,8 +972,10 @@
             }
             updateAccountsPayableVisibility();
             updateW9Display();
+            console.log('Form loaded from localStorage');
         }
         function clearForm() {
+            console.log('Clearing form');
             localStorage.removeItem('customerIntakeForm');
             document.querySelector('form').reset();
             const locations = document.getElementById('locations');
@@ -967,11 +1008,12 @@
             setTimeout(() => feedback.remove(), 2000);
             updateAccountsPayableVisibility();
             updateW9Display();
+            console.log('Form cleared');
         }
     </script>
 </head>
 <body>
-    <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/.netlify/functions/submit-form">
+    <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="">
         <input type="hidden" name="form-name" value="customer-intake">
         <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
         <div class="logo-container">
@@ -1225,14 +1267,14 @@
                     Touch to draw your signature.
                 </div>
                 <canvas id="signature-pad" width="400" height="150" aria-label="Draw your signature here"></canvas>
-                <canvas id="mobile-signature-pad" width="600" height="200" aria-label="Draw your signature here"></canvas>
+                <canvas id="mobile-signature-pad" width="400" height="150" aria-label="Draw your signature here"></canvas>
                 <input type="hidden" id="signature-data" name="signature" value="">
                 <button type="button" id="clear-signature">Clear Signature</button>
             </div>
         </div>
         <button type="button" id="save-form">Save</button>
         <button type="button" id="clear-form">Clear</button>
-        <button type="submit">Submit Form</button>
+        <button type="submit" id="submit-form" aria-label="Submit Form">Submit Form</button>
     </form>
 </body>
 </html>
