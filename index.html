@@ -877,7 +877,6 @@
                 form.appendChild(successMsg);
 
                 try {
-                    // Use fetch for debugging
                     const response = await fetch('/', {
                         method: 'POST',
                         body: formData,
@@ -902,22 +901,6 @@
                     form.appendChild(errorMsg);
                     setTimeout(() => errorMsg.remove(), 5000);
                 }
-
-                // Fallback form.submit() (commented out)
-                /*
-                try {
-                    form.submit();
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    successMsg.remove();
-                    const errorMsg = document.createElement('span');
-                    errorMsg.className = 'form-error';
-                    errorMsg.textContent = 'Error submitting form. Please try again or contact support.';
-                    errorMsg.setAttribute('role', 'alert');
-                    form.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 5000);
-                }
-                */
             });
 
             document.getElementById('tax_exempt_yes').addEventListener('change', () => {
@@ -1123,8 +1106,6 @@
         <div>
             <label for="customer_name">Customer Name:</label><br>
             <input type="text" id="customer_name" name="customer_name" required aria-label="Customer Name">
-            <br><br>
-            <h6 class="w9-message">Please provide an up to date W-9</h6>
         </div>
         <div class="radio-group">
             <label>Are you a part of a multi-location entity?</label>
@@ -1148,6 +1129,18 @@
                     <label for="rg_setup_no">No</label>
                 </div>
             </div>
+        </div>
+        <div id="single_billing" class="radio-group" style="display:none;">
+            <label>Do you have a single billing point of contact?</label>
+            <div class="radio-buttons">
+                <input type="radio" id="single_billing_yes" name="single_billing" value="yes">
+                <label for="single_billing_yes">Yes</label>
+                <input type="radio" id="single_billing_no" name="single_billing" value="no">
+                <label for="single_billing_no">No</label>
+            </div>
+        </div>
+        <div id="single_billing_message" style="display:none; color:green;">
+            Please add additional locations below to provide billing and shipping information for each location
         </div>
         <div id="billing_type" style="display:none;">
             <div class="radio-group">
@@ -1260,18 +1253,6 @@
         <div id="other_pricing" style="display:none;">
             <input type="text" name="other_pricing" maxlength="20" aria-label="Custom Pricing Structure">
         </div>
-        <div id="single_billing" class="radio-group" style="display:none;">
-            <label>Do you have a single billing point of contact?</label>
-            <div class="radio-buttons">
-                <input type="radio" id="single_billing_yes" name="single_billing" value="yes">
-                <label for="single_billing_yes">Yes</label>
-                <input type="radio" id="single_billing_no" name="single_billing" value="no">
-                <label for="single_billing_no">No</label>
-            </div>
-        </div>
-        <div id="single_billing_message" style="display:none; color:green;">
-            Please add additional locations below to provide billing and shipping information for each location
-        </div>
         <div id="locations">
             <div class="location">
                 <h2>Primary Information</h2>
@@ -1356,6 +1337,7 @@
         <div>
             <label for="notes">Special Account Notes:</label><br>
             <textarea id="notes" name="notes" maxlength="200" aria-label="Special Account Notes"></textarea>
+            <h6 class="w9-message">Please provide an up to date W-9</h6>
         </div>
         <div id="signature-section">
             <div class="signature-container">
