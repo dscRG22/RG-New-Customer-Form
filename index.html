@@ -137,6 +137,7 @@
             height: 150px;
             display: block;
             touch-action: none;
+            visibility: visible;
         }
         #open-signature-modal {
             display: none;
@@ -238,7 +239,9 @@
             border: 1px solid #666;
             background-color: #222;
             width: 100%;
-            height: calc(100% - 120px);
+            height: calc(100vh - 120px);
+            display: block;
+            visibility: visible;
             touch-action: none;
         }
         #modal-instructions {
@@ -304,6 +307,7 @@
         @media (max-width: 600px) and (orientation: landscape) {
             #modal-canvas {
                 display: block;
+                visibility: visible;
             }
             #modal-orientation-prompt {
                 display: none;
@@ -456,7 +460,7 @@
                         inputs[j].setAttribute('required', 'required');
                     }
                     if (inputs[j].name.startsWith('liftgate') || inputs[j].name.startsWith('appt')) {
-                        inputs[i].setAttribute('required', 'required');
+                        inputs[j].setAttribute('required', 'required');
                     }
                 }
                 var label = locations[i].querySelector('label[for^="delivery_hours"]');
@@ -638,25 +642,33 @@
             function resizeCanvas() {
                 const rect = signaturePad.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                signaturePad.width = rect.width * dpr;
-                signaturePad.height = rect.height * dpr;
+                const width = Math.max(rect.width, 100); // Ensure non-zero width
+                const height = Math.max(rect.height, 50); // Ensure non-zero height
+                signaturePad.width = width * dpr;
+                signaturePad.height = height * dpr;
                 ctx.scale(dpr, dpr);
                 ctx.strokeStyle = '#ffffff';
-                signaturePad.style.width = rect.width + 'px';
-                signaturePad.style.height = rect.height + 'px';
+                ctx.lineWidth = 2;
+                signaturePad.style.width = width + 'px';
+                signaturePad.style.height = height + 'px';
+                console.log('Desktop canvas resized:', { width, height });
             }
 
             // Resize modal canvas
             function resizeModalCanvas() {
-                if (!modalCanvas) return;
+                if (!modalCanvas || !modalCtx) return;
                 const rect = modalCanvas.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
-                modalCanvas.width = rect.width * dpr;
-                modalCanvas.height = rect.height * dpr;
+                const width = Math.max(rect.width, 100); // Ensure non-zero width
+                const height = Math.max(rect.height, 50); // Ensure non-zero height
+                modalCanvas.width = width * dpr;
+                modalCanvas.height = height * dpr;
                 modalCtx.scale(dpr, dpr);
                 modalCtx.strokeStyle = '#ffffff';
-                modalCanvas.style.width = rect.width + 'px';
-                modalCanvas.style.height = rect.height + 'px';
+                modalCtx.lineWidth = 2;
+                modalCanvas.style.width = width + 'px';
+                modalCanvas.style.height = height + 'px';
+                console.log('Modal canvas resized:', { width, height });
             }
 
             // Check orientation
@@ -665,6 +677,7 @@
                 const isLandscape = window.matchMedia("(orientation: landscape)").matches;
                 modalOrientationPrompt.style.display = isLandscape ? 'none' : 'block';
                 modalCanvas.style.display = isLandscape ? 'block' : 'none';
+                console.log('Orientation:', isLandscape ? 'landscape' : 'portrait');
             }
 
             // Desktop signature pad events
@@ -695,6 +708,7 @@
                     const rect = signaturePad.getBoundingClientRect();
                     lastX = e.clientX - rect.left;
                     lastY = e.clientY - rect.top;
+                    console.log('Desktop mousedown:', { x: lastX, y: lastY });
                 });
                 signaturePad.addEventListener('mousemove', (e) => {
                     if (isDrawing) {
@@ -707,6 +721,7 @@
                         ctx.stroke();
                         lastX = x;
                         lastY = y;
+                        console.log('Desktop mousemove:', { x, y });
                     }
                 });
                 signaturePad.addEventListener('mouseup', () => isDrawing = false);
@@ -719,7 +734,10 @@
                 modalCtx.lineWidth = 2;
 
                 window.addEventListener('resize', debounce(resizeModalCanvas, 100));
-                window.addEventListener('orientationchange', checkOrientation);
+                window.addEventListener('orientationchange', () => {
+                    checkOrientation();
+                    resizeModalCanvas();
+                });
                 resizeModalCanvas();
                 checkOrientation();
 
@@ -731,7 +749,7 @@
                     if (e.key === 'Enter' || e.key === ' ') {
                         const feedback = document.createElement('span');
                         feedback.className = 'signature-feedback';
-                        feedback.textContent = 'Please use touch to draw your signature.';
+                        feedback.textContent = 'Please touch the canvas to draw your signature.';
                         feedback.style.color = '#ff5555';
                         feedback.setAttribute('role', 'alert');
                         if (!signatureModal.querySelector('.signature-feedback')) {
@@ -748,6 +766,12 @@
                     isDrawing = true;
                     lastX = (touch.clientX - rect.left - window.scrollX) * (modalCanvas.width / rect.width);
                     lastY = (touch.clientY - rect.top - window.scrollY) * (modalCanvas.height / rect.height);
+                    console.log('Touch start:', { x: lastX, y: lastY });
+                    // Draw a dot for visual feedback
+                    modalCtx.beginPath();
+                    modalCtx.arc(lastX, lastY, 1, 0, 2 * Math.PI);
+                    modalCtx.fillStyle = '#ffffff';
+                    modalCtx.fill();
                 });
                 modalCanvas.addEventListener('touchmove', (e) => {
                     e.preventDefault();
@@ -762,15 +786,18 @@
                         modalCtx.stroke();
                         lastX = x;
                         lastY = y;
+                        console.log('Touch move:', { x, y });
                     }
                 });
                 modalCanvas.addEventListener('touchend', (e) => {
                     e.preventDefault();
                     isDrawing = false;
+                    console.log('Touch end');
                 });
                 modalCanvas.addEventListener('touchcancel', (e) => {
                     e.preventDefault();
                     isDrawing = false;
+                    console.log('Touch cancel');
                 });
 
                 // Modal open/close
@@ -779,6 +806,7 @@
                     checkOrientation();
                     resizeModalCanvas();
                     modalCanvas.focus();
+                    console.log('Modal opened');
                 });
 
                 document.getElementById('save-signature').addEventListener('click', () => {
@@ -798,16 +826,21 @@
                         signatureSection.appendChild(feedback);
                         setTimeout(() => feedback.remove(), 2000);
                     }
+                    console.log('Signature saved');
                 });
 
                 document.getElementById('close-signature-modal').addEventListener('click', () => {
                     signatureModal.style.display = 'none';
+                    if (modalCtx) modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+                    console.log('Modal closed');
                 });
 
                 // Close modal with Esc key
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape' && signatureModal.style.display === 'flex') {
                         signatureModal.style.display = 'none';
+                        if (modalCtx) modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+                        console.log('Modal closed with Esc');
                     }
                 });
             }
@@ -826,6 +859,7 @@
                     signatureSection.appendChild(feedback);
                     setTimeout(() => feedback.remove(), 2000);
                 }
+                console.log('Signature cleared');
             });
 
             // Form submission
@@ -855,6 +889,7 @@
                         ctx.clearRect(0, 0, signaturePad.width, signaturePad.height);
                         if (modalCtx) modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
                         document.getElementById('signature-data').value = '';
+                        console.log('Form submitted');
                     } else {
                         throw new Error('Submission failed');
                     }
@@ -865,6 +900,7 @@
                     errorMsg.setAttribute('role', 'alert');
                     form.appendChild(errorMsg);
                     setTimeout(() => errorMsg.remove(), 3000);
+                    console.error('Form submission error:', error);
                 }
             });
 
@@ -1281,7 +1317,7 @@
         </div>
         <div id="signature-modal">
             <div id="modal-instructions" aria-live="polite">
-                Please rotate your device to landscape mode and use your finger or stylus to draw your signature.
+                Please rotate your device to landscape mode and touch the canvas to draw your signature.
             </div>
             <div id="modal-orientation-prompt" aria-live="assertive">
                 Please rotate your device to landscape mode to sign.
