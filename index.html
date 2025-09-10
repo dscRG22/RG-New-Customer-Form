@@ -242,7 +242,6 @@
             margin-top: 5px;
             display: block;
         }
-        /* Mobile Responsiveness */
         @media (max-width: 600px) {
             form {
                 margin: 20px;
@@ -279,7 +278,6 @@
             const rgSetupYes = document.getElementById('rg_setup_yes')?.checked || false;
             const billingCentralized = document.getElementById('billing_centralized')?.checked || false;
             const apSections = document.querySelectorAll('.accounts-payable');
-           
             if (multiLocationYes && rgSetupYes && billingCentralized) {
                 apSections.forEach(section => section.classList.add('hidden'));
             } else {
@@ -299,44 +297,44 @@
                     <div>
                         <label>Purchasing Contact:</label>
                         <div class="row">
-                            <input type="text" name="purchasing_first[]" placeholder="First Name" required aria-label="Purchasing Contact First Name">
-                            <input type="text" name="purchasing_last[]" placeholder="Last Name" required aria-label="Purchasing Contact Last Name">
+                            <input type="text" name="purchasing_first[]" placeholder="First Name" aria-label="Purchasing Contact First Name">
+                            <input type="text" name="purchasing_last[]" placeholder="Last Name" aria-label="Purchasing Contact Last Name">
                         </div>
                         <div class="row">
-                            <input type="email" name="purchasing_email[]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" required aria-label="Purchasing Contact Email">
-                            <input type="tel" name="purchasing_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Purchasing Contact Phone">
+                            <input type="email" name="purchasing_email[]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" aria-label="Purchasing Contact Email">
+                            <input type="tel" name="purchasing_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Purchasing Contact Phone">
                         </div>
                     </div>
                     <div>
                         <label>Ship to Address:</label>
                         <div class="row">
-                            <input type="text" name="ship_street[]" placeholder="Street" required aria-label="Shipping Street">
-                            <input type="text" name="ship_city[]" placeholder="City" required aria-label="Shipping City">
-                            <input type="text" name="ship_state[]" placeholder="State" required aria-label="Shipping State">
-                            <input type="text" name="ship_zip[]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" required aria-label="Shipping Zip Code">
+                            <input type="text" name="ship_street[]" placeholder="Street" aria-label="Shipping Street">
+                            <input type="text" name="ship_city[]" placeholder="City" aria-label="Shipping City">
+                            <input type="text" name="ship_state[]" placeholder="State" aria-label="Shipping State">
+                            <input type="text" name="ship_zip[]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" aria-label="Shipping Zip Code">
                         </div>
                     </div>
                     <div>
                         <label>Warehouse and/or Receiving Contact:</label>
                         <div class="row">
-                            <input type="text" name="warehouse_first[]" placeholder="First Name" required aria-label="Warehouse Contact First Name">
-                            <input type="text" name="warehouse_last[]" placeholder="Last Name" required aria-label="Warehouse Contact Last Name">
+                            <input type="text" name="warehouse_first[]" placeholder="First Name" aria-label="Warehouse Contact First Name">
+                            <input type="text" name="warehouse_last[]" placeholder="Last Name" aria-label="Warehouse Contact Last Name">
                         </div>
                         <div class="row">
-                            <input type="email" name="warehouse_email[]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" required aria-label="Warehouse Contact Email">
-                            <input type="tel" name="warehouse_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Warehouse Contact Phone">
+                            <input type="email" name="warehouse_email[]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}$" aria-label="Warehouse Contact Email">
+                            <input type="tel" name="warehouse_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Warehouse Contact Phone">
                         </div>
                     </div>
                     <div class="dropdown-group">
                         <label for="delivery_hours_${count}">Dock Availability:</label>
                         <div class="dropdown-field">
-                            <input type="text" id="delivery_hours_${count}" name="delivery_hours[]" placeholder="Hours & Days" required aria-label="Dock Availability">
+                            <input type="text" id="delivery_hours_${count}" name="delivery_hours[]" placeholder="Hours & Days" aria-label="Dock Availability">
                         </div>
                     </div>
                     <div class="radio-group">
                         <label>Liftgate Required?</label>
                         <div class="radio-buttons">
-                            <input type="radio" id="liftgate_yes_${count}" name="liftgate[${count}]" value="yes" required>
+                            <input type="radio" id="liftgate_yes_${count}" name="liftgate[${count}]" value="yes">
                             <label for="liftgate_yes_${count}">Yes</label>
                             <input type="radio" id="liftgate_no_${count}" name="liftgate[${count}]" value="no">
                             <label for="liftgate_no_${count}">No</label>
@@ -345,7 +343,7 @@
                     <div class="radio-group">
                         <label>Delivery Appointment Required?</label>
                         <div class="radio-buttons">
-                            <input type="radio" id="appt_yes_${count}" name="appt[${count}]" value="yes" required>
+                            <input type="radio" id="appt_yes_${count}" name="appt[${count}]" value="yes">
                             <label for="appt_yes_${count}">Yes</label>
                             <input type="radio" id="appt_no_${count}" name="appt[${count}]" value="no">
                             <label for="appt_no_${count}">No</label>
@@ -369,10 +367,6 @@
                             inputs[i].id = `delivery_hours_${count}`;
                             inputs[i].setAttribute('aria-label', 'Dock Availability');
                             inputs[i].placeholder = 'Hours & Days';
-                            inputs[i].setAttribute('required', 'required');
-                        }
-                        if (inputs[i].name.match(/^(purchasing|warehouse|ap)_(first|last|email|phone)\[\]/)) {
-                            inputs[i].setAttribute('required', 'required');
                         }
                     }
                 }
@@ -387,7 +381,6 @@
             removeBtn.textContent = 'Remove Location';
             removeBtn.onclick = function() { removeLocation(this); };
             newLoc.appendChild(removeBtn);
-           
             locations.appendChild(newLoc);
             updateAccountsPayableVisibility();
         }
@@ -413,10 +406,6 @@
                         inputs[j].id = `delivery_hours_${i}`;
                         inputs[j].setAttribute('aria-label', 'Dock Availability');
                         inputs[j].placeholder = 'Hours & Days';
-                        inputs[j].setAttribute('required', 'required');
-                    }
-                    if (inputs[j].name.match(/^(purchasing|warehouse|ap)_(first|last|email|phone)\[\]/)) {
-                        inputs[j].setAttribute('required', 'required');
                     }
                 }
                 var label = locations[i].querySelector('label[for^="delivery_hours"]');
@@ -518,7 +507,6 @@
             }
         }
 
-        // Save signature function
         function saveSignature() {
             console.log('Saving signature');
             const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -534,7 +522,7 @@
                     signatureData = textSignature.value;
                     console.log('Text signature saved:', signatureData);
                 } else {
-                    signatureData = isMobile ? mobileSignaturePad.toDataURL('image/jpeg', 0.7) : signaturePad.toDataURL('image/jpeg', 0.7);
+                    signatureData = isMobile ? mobileSignaturePad.toDataURL('image/jpeg', 0.5) : signaturePad.toDataURL('image/jpeg', 0.5);
                     console.log('Canvas signature saved:', signatureData.substring(0, 50) + '...', 'Size:', signatureData.length);
                 }
                 if (!signatureData || signatureData === 'data:,') {
@@ -572,7 +560,6 @@
             }
         }
 
-        // Validate form fields
         function validateForm() {
             console.log('Validating form');
             const form = document.querySelector('form');
@@ -585,7 +572,6 @@
             const signatureSection = document.getElementById('signature-section');
             let isValid = true;
 
-            // Clear previous error messages
             document.querySelectorAll('.form-error').forEach(el => el.remove());
 
             inputs.forEach(input => {
@@ -604,10 +590,9 @@
                 }
             });
 
-            // Validate signature
             let signatureData = signatureDataInput.value;
             if (!signatureData) {
-                signatureData = textSignature && textSignature.value.trim() ? textSignature.value : (isMobile ? mobileSignaturePad.toDataURL('image/jpeg', 0.7) : signaturePad.toDataURL('image/jpeg', 0.7));
+                signatureData = textSignature && textSignature.value.trim() ? textSignature.value : (isMobile ? mobileSignaturePad.toDataURL('image/jpeg', 0.5) : signaturePad.toDataURL('image/jpeg', 0.5));
                 signatureDataInput.value = signatureData;
                 console.log('Validate signature:', signatureData.substring(0, 50) + '...', 'Size:', signatureData.length);
             }
@@ -646,7 +631,6 @@
             let lastX = 0;
             let lastY = 0;
 
-            // Show/hide signature pads and instructions
             if (isMobile) {
                 signaturePad.style.display = 'none';
                 mobileSignaturePad.style.display = 'block';
@@ -659,7 +643,6 @@
                 mobileSignatureInstructions.style.display = 'none';
             }
 
-            // Debounce function for resize
             function debounce(fn, wait) {
                 let timeout;
                 return function (...args) {
@@ -668,7 +651,6 @@
                 };
             }
 
-            // Resize desktop canvas
             function resizeCanvas() {
                 const rect = signaturePad.getBoundingClientRect();
                 const dpr = window.devicePixelRatio || 1;
@@ -684,7 +666,6 @@
                 console.log('Desktop canvas resized:', { width, height });
             }
 
-            // Resize mobile canvas
             function resizeMobileCanvas() {
                 if (!mobileSignaturePad || !mobileCtx) return;
                 const rect = mobileSignaturePad.getBoundingClientRect();
@@ -701,7 +682,6 @@
                 console.log('Mobile canvas resized:', { width, height });
             }
 
-            // Desktop signature pad events
             if (!isMobile) {
                 window.addEventListener('resize', debounce(resizeCanvas, 100));
                 resizeCanvas();
@@ -749,7 +729,7 @@
                         lastX = x;
                         lastY = y;
                         try {
-                            const signatureData = signaturePad.toDataURL('image/jpeg', 0.7);
+                            const signatureData = signaturePad.toDataURL('image/jpeg', 0.5);
                             document.getElementById('signature-data').value = signatureData;
                             console.log('Desktop mousemove signature:', signatureData.substring(0, 50) + '...', 'Size:', signatureData.length);
                         } catch (error) {
@@ -760,7 +740,7 @@
                 signaturePad.addEventListener('mouseup', { handleEvent: (e) => {
                     isDrawing = false;
                     try {
-                        const signatureData = signaturePad.toDataURL('image/jpeg', 0.7);
+                        const signatureData = signaturePad.toDataURL('image/jpeg', 0.5);
                         document.getElementById('signature-data').value = signatureData;
                         console.log('Desktop mouseup signature:', signatureData.substring(0, 50) + '...', 'Size:', signatureData.length);
                     } catch (error) {
@@ -773,7 +753,6 @@
                 }, passive: false });
             }
 
-            // Mobile signature pad events
             if (isMobile && mobileSignaturePad) {
                 mobileCtx.strokeStyle = '#ffffff';
                 mobileCtx.lineWidth = 2;
@@ -829,7 +808,7 @@
                         lastX = x;
                         lastY = y;
                         try {
-                            const signatureData = mobileSignaturePad.toDataURL('image/jpeg', 0.7);
+                            const signatureData = mobileSignaturePad.toDataURL('image/jpeg', 0.5);
                             document.getElementById('signature-data').value = signatureData;
                             console.log('Mobile touchmove signature:', signatureData.substring(0, 50) + '...', 'Size:', signatureData.length);
                         } catch (error) {
@@ -841,7 +820,7 @@
                     e.preventDefault();
                     isDrawing = false;
                     try {
-                        const signatureData = mobileSignaturePad.toDataURL('image/jpeg', 0.7);
+                        const signatureData = mobileSignaturePad.toDataURL('image/jpeg', 0.5);
                         document.getElementById('signature-data').value = signatureData;
                         console.log('Mobile touchend signature:', signatureData.substring(0, 50) + '...', 'Size:', signatureData.length);
                     } catch (error) {
@@ -876,9 +855,7 @@
                 console.log('Signature cleared');
             });
 
-            // Form submission
-            const form = document.querySelector('form');
-            form.addEventListener('submit', (e) => {
+            document.getElementById('submit-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 console.log('Submit event triggered');
                 if (!validateForm()) {
@@ -887,6 +864,7 @@
                 }
 
                 console.log('Form validated, submitting to Netlify');
+                const form = e.target;
                 const formData = new FormData(form);
                 for (let [key, value] of formData.entries()) {
                     console.log(`FormData: ${key}=${typeof value === 'string' ? value.substring(0, 50) : '[non-string]'}`);
@@ -899,21 +877,7 @@
                 form.appendChild(successMsg);
 
                 try {
-                    form.submit();
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    successMsg.remove();
-                    const errorMsg = document.createElement('span');
-                    errorMsg.className = 'form-error';
-                    errorMsg.textContent = 'Error submitting form. Please try again or contact support.';
-                    errorMsg.setAttribute('role', 'alert');
-                    form.appendChild(errorMsg);
-                    setTimeout(() => errorMsg.remove(), 5000);
-                }
-
-                // Fallback fetch for debugging (commented out)
-                /*
-                try {
+                    // Use fetch for debugging
                     const response = await fetch('/', {
                         method: 'POST',
                         body: formData,
@@ -929,21 +893,31 @@
                         throw new Error(`Submission failed: ${response.status} ${response.statusText}`);
                     }
                 } catch (error) {
-                    console.error('Fetch error:', error);
+                    console.error('Submission error:', error);
                     successMsg.remove();
                     const errorMsg = document.createElement('span');
                     errorMsg.className = 'form-error';
-                    errorMsg.textContent = `Error submitting form: ${error.message}. Please try again.`;
+                    errorMsg.textContent = `Error submitting form: ${error.message}. Please try again or contact support.`;
+                    errorMsg.setAttribute('role', 'alert');
+                    form.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 5000);
+                }
+
+                // Fallback form.submit() (commented out)
+                /*
+                try {
+                    form.submit();
+                } catch (error) {
+                    console.error('Submission error:', error);
+                    successMsg.remove();
+                    const errorMsg = document.createElement('span');
+                    errorMsg.className = 'form-error';
+                    errorMsg.textContent = 'Error submitting form. Please try again or contact support.';
                     errorMsg.setAttribute('role', 'alert');
                     form.appendChild(errorMsg);
                     setTimeout(() => errorMsg.remove(), 5000);
                 }
                 */
-            });
-
-            // Debug submit button click
-            document.getElementById('submit-form').addEventListener('click', () => {
-                console.log('Submit button clicked');
             });
 
             document.getElementById('tax_exempt_yes').addEventListener('change', () => {
@@ -990,7 +964,6 @@
             updateAccountsPayableVisibility();
             updateW9Display();
 
-            // Load saved signature
             const savedSignature = localStorage.getItem('signatureData');
             if (savedSignature) {
                 const textSignature = document.getElementById('text-signature');
@@ -1020,10 +993,9 @@
             const formData = new FormData(form);
             const data = {};
 
-            // Set signature data
             let signatureData = signatureDataInput.value;
             if (!signatureData) {
-                signatureData = textSignature && textSignature.value.trim() ? textSignature.value : (isMobile ? mobileSignaturePad.toDataURL('image/jpeg', 0.7) : signaturePad.toDataURL('image/jpeg', 0.7));
+                signatureData = textSignature && textSignature.value.trim() ? textSignature.value : (isMobile ? mobileSignaturePad.toDataURL('image/jpeg', 0.5) : signaturePad.toDataURL('image/jpeg', 0.5));
                 signatureDataInput.value = signatureData;
                 console.log('Saving form signature:', signatureData.substring(0, 50) + '...', 'Size:', signatureData.length);
             }
@@ -1291,7 +1263,7 @@
         <div id="single_billing" class="radio-group" style="display:none;">
             <label>Do you have a single billing point of contact?</label>
             <div class="radio-buttons">
-                <input type="radio" id="single_billing_yes" name="single_billing" value="yes" required>
+                <input type="radio" id="single_billing_yes" name="single_billing" value="yes">
                 <label for="single_billing_yes">Yes</label>
                 <input type="radio" id="single_billing_no" name="single_billing" value="no">
                 <label for="single_billing_no">No</label>
@@ -1326,12 +1298,12 @@
                 <div class="accounts-payable">
                     <label>Accounts Payable Contact:</label>
                     <div class="row">
-                        <input type="text" name="ap_first[]" placeholder="First Name" required aria-label="Accounts Payable First Name">
-                        <input type="text" name="ap_last[]" placeholder="Last Name" required aria-label="Accounts Payable Last Name">
+                        <input type="text" name="ap_first[]" placeholder="First Name" aria-label="Accounts Payable First Name">
+                        <input type="text" name="ap_last[]" placeholder="Last Name" aria-label="Accounts Payable Last Name">
                     </div>
                     <div class="row">
-                        <input type="email" name="ap_email[]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required aria-label="Accounts Payable Email">
-                        <input type="tel" name="ap_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Accounts Payable Phone">
+                        <input type="email" name="ap_email[]" placeholder="Email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" aria-label="Accounts Payable Email">
+                        <input type="tel" name="ap_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Accounts Payable Phone">
                     </div>
                 </div>
                 <div>
