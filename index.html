@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -205,9 +206,9 @@
     </style>
     <script>
         function updateAccountsPayableVisibility() {
-            const multiLocationYes = document.getElementById('multi_location_yes').checked;
-            const rgSetupYes = document.getElementById('rg_setup_yes') && document.getElementById('rg_setup_yes').checked;
-            const billingCentralized = document.getElementById('billing_centralized') && document.getElementById('billing_centralized').checked;
+            const multiLocationYes = document.getElementById('multi_location_yes')?.checked || false;
+            const rgSetupYes = document.getElementById('rg_setup_yes')?.checked || false;
+            const billingCentralized = document.getElementById('billing_centralized')?.checked || false;
             const apSections = document.querySelectorAll('.accounts-payable');
             
             if (multiLocationYes && rgSetupYes && billingCentralized) {
@@ -220,7 +221,7 @@
         function addLocation() {
             var locations = document.getElementById('locations');
             var count = locations.getElementsByClassName('location').length;
-            var singleBillingYes = document.getElementById('single_billing_yes') && document.getElementById('single_billing_yes').checked;
+            var singleBillingYes = document.getElementById('single_billing_yes')?.checked || false;
             var newLoc;
 
             if (singleBillingYes) {
@@ -394,7 +395,7 @@
             document.getElementById('network_setup').style.display = 'block';
             document.getElementById('multi_location_message').style.display = 'block';
             updateSingleBillingVisibility();
-            updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function hideNetworkSetup() {
@@ -402,60 +403,75 @@
             document.getElementById('multi_location_message').style.display = 'none';
             hideBillingType();
             updateSingleBillingVisibility();
-            updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function showBillingType() {
             document.getElementById('billing_type').style.display = 'block';
             updateSingleBillingVisibility();
-            updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function hideBillingType() {
             document.getElementById('billing_type').style.display = 'none';
             hideBillingMessages();
             updateSingleBillingVisibility();
-            updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function showLocalizedMessage() {
             document.getElementById('localized_message').style.display = 'block';
             document.getElementById('centralized_message').style.display = 'none';
-            updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function showCentralizedMessage() {
             document.getElementById('centralized_message').style.display = 'block';
             document.getElementById('localized_message').style.display = 'none';
-            updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function hideBillingMessages() {
             document.getElementById('localized_message').style.display = 'none';
             document.getElementById('centralized_message').style.display = 'none';
-            updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function updateSingleBillingVisibility() {
             const multiLocationYes = document.getElementById('multi_location_yes').checked;
-            const rgSetupNo = document.getElementById('rg_setup_no') && document.getElementById('rg_setup_no').checked;
+            const rgSetupNo = document.getElementById('rg_setup_no')?.checked || false;
             const singleBillingDiv = document.getElementById('single_billing');
-            if (multiLocationYes && rgSetupNo) {
-                singleBillingDiv.style.display = 'flex';
-            } else {
-                singleBillingDiv.style.display = 'none';
-                document.getElementById('single_billing_message').style.display = 'none';
+            if (singleBillingDiv) {
+                singleBillingDiv.style.display = multiLocationYes && rgSetupNo ? 'flex' : 'none';
             }
+            const singleBillingMessage = document.getElementById('single_billing_message');
+            if (singleBillingMessage) singleBillingMessage.style.display = 'none';
             updateAccountsPayableVisibility();
         }
 
         function showSingleBillingMessage() {
-            if (document.getElementById('single_billing_no').checked) {
-                document.getElementById('single_billing_message').style.display = 'block';
-            } else {
-                document.getElementById('single_billing_message').style.display = 'none';
+            const singleBillingMessage = document.getElementById('single_billing_message');
+            if (singleBillingMessage) {
+                singleBillingMessage.style.display = document.getElementById('single_billing_no').checked ? 'block' : 'none';
             }
             updateAccountsPayableVisibility();
+        }
+
+        function updateW9Display() {
+            const w9Message = document.querySelector('.w9-message');
+            if (!w9Message) return;
+
+            const multiLocationYes = document.getElementById('multi_location_yes').checked;
+            const multiLocationNo = document.getElementById('multi_location_no').checked;
+            const rgSetupYes = document.getElementById('rg_setup_yes')?.checked || false;
+            const rgSetupNo = document.getElementById('rg_setup_no')?.checked || false;
+            const billingLocalized = document.getElementById('billing_localized')?.checked || false;
+
+            if ((multiLocationYes && rgSetupNo) || multiLocationNo || (multiLocationYes && rgSetupYes && billingLocalized)) {
+                w9Message.style.display = 'block';
+            } else {
+                w9Message.style.display = 'none';
+            }
         }
 
         window.onload = function() {
@@ -543,54 +559,51 @@
 
             document.getElementById('tax_exempt_yes').addEventListener('change', () => {
                 document.getElementById('tax_exempt_message').style.display = 'block';
+                updateW9Display();
             });
             document.getElementById('tax_exempt_no').addEventListener('change', () => {
                 document.getElementById('tax_exempt_message').style.display = 'none';
+                updateW9Display();
             });
 
             document.getElementById('payment_terms_yes').addEventListener('change', () => {
                 document.getElementById('payment_terms_message').style.display = 'block';
                 document.getElementById('payment_terms_no_message').style.display = 'none';
+                updateW9Display();
             });
             document.getElementById('payment_terms_no').addEventListener('change', () => {
                 document.getElementById('payment_terms_message').style.display = 'none';
                 document.getElementById('payment_terms_no_message').style.display = 'block';
+                updateW9Display();
             });
 
-            document.getElementById('multi_location_yes').addEventListener('change', showNetworkSetup);
-            document.getElementById('multi_location_no').addEventListener('change', hideNetworkSetup);
-            if (document.getElementById('rg_setup_yes')) {
-                document.getElementById('rg_setup_yes').addEventListener('change', () => {
-                    showBillingType();
-                    updateAccountsPayableVisibility();
-                });
-            }
-            if (document.getElementById('rg_setup_no')) {
-                document.getElementById('rg_setup_no').addEventListener('change', () => {
-                    hideBillingType();
-                    updateAccountsPayableVisibility();
-                });
-            }
-            if (document.getElementById('billing_centralized')) {
-                document.getElementById('billing_centralized').addEventListener('change', () => {
-                    showCentralizedMessage();
-                    updateAccountsPayableVisibility();
-                });
-            }
-            if (document.getElementById('billing_localized')) {
-                document.getElementById('billing_localized').addEventListener('change', () => {
-                    showLocalizedMessage();
-                    updateAccountsPayableVisibility();
-                });
-            }
-            document.getElementById('single_billing_yes').addEventListener('change', showSingleBillingMessage);
-            document.getElementById('single_billing_no').addEventListener('change', showSingleBillingMessage);
+            document.getElementById('multi_location_yes').addEventListener('change', () => { showNetworkSetup(); updateW9Display(); });
+            document.getElementById('multi_location_no').addEventListener('change', () => { hideNetworkSetup(); updateW9Display(); });
+            document.getElementById('rg_setup_yes').addEventListener('change', () => {
+                showBillingType();
+                updateW9Display();
+            });
+            document.getElementById('rg_setup_no').addEventListener('change', () => {
+                hideBillingType();
+                updateW9Display();
+            });
+            document.getElementById('billing_centralized').addEventListener('change', () => {
+                showCentralizedMessage();
+                updateW9Display();
+            });
+            document.getElementById('billing_localized').addEventListener('change', () => {
+                showLocalizedMessage();
+                updateW9Display();
+            });
+            document.getElementById('single_billing_yes').addEventListener('change', () => { showSingleBillingMessage(); updateW9Display(); });
+            document.getElementById('single_billing_no').addEventListener('change', () => { showSingleBillingMessage(); updateW9Display(); });
 
             document.getElementById('save-form').addEventListener('click', saveForm);
             document.getElementById('clear-form').addEventListener('click', clearForm);
 
             loadForm();
             updateAccountsPayableVisibility();
+            updateW9Display();
         };
 
         function saveForm() {
@@ -636,10 +649,10 @@
                     }
                 });
             }
-            if (document.getElementById('multi_location_yes') && document.getElementById('multi_location_yes').checked) showNetworkSetup();
-            if (document.getElementById('rg_setup_yes') && document.getElementById('rg_setup_yes').checked) showBillingType();
-            if (document.getElementById('billing_centralized') && document.getElementById('billing_centralized').checked) showCentralizedMessage();
-            if (document.getElementById('billing_localized') && document.getElementById('billing_localized').checked) showLocalizedMessage();
+            if (document.getElementById('multi_location_yes').checked) showNetworkSetup();
+            if (document.getElementById('rg_setup_yes').checked) showBillingType();
+            if (document.getElementById('billing_centralized').checked) showCentralizedMessage();
+            if (document.getElementById('billing_localized').checked) showLocalizedMessage();
             if (document.getElementById('gpo_yes').checked) showGpoOptions();
             if (document.getElementById('distributor_yes').checked) showDistOptions();
             if (document.getElementById('pricing').value === 'other') checkOther(document.getElementById('pricing'));
@@ -662,6 +675,7 @@
                 };
             }
             updateAccountsPayableVisibility();
+            updateW9Display();
         }
 
         function clearForm() {
@@ -686,6 +700,7 @@
             ctx.strokeStyle = '#ffffff';
             alert('Form cleared!');
             updateAccountsPayableVisibility();
+            updateW9Display();
         }
     </script>
 </head>
@@ -703,6 +718,47 @@
             <input type="text" id="customer_name" name="customer_name" required aria-label="Customer Name">
             <br><br>
             <h6 class="w9-message">Please provide an up to date W-9</h6>
+        </div>
+
+        <div class="radio-group">
+            <label>Are you a part of a multi-location entity?</label>
+            <div class="radio-buttons">
+                <input type="radio" id="multi_location_yes" name="multi_location" value="yes" onclick="showNetworkSetup()">
+                <label for="multi_location_yes">Yes</label>
+                <input type="radio" id="multi_location_no" name="multi_location" value="no" onclick="hideNetworkSetup()">
+                <label for="multi_location_no">No</label>
+            </div>
+        </div>
+        <div id="multi_location_message" style="display:none; color:green;">
+            Please add additional locations below to provide each location's shipping information
+        </div>
+        <div id="network_setup" style="display:none;">
+            <div class="radio-group">
+                <label>Is your network already set up with RG?</label>
+                <div class="radio-buttons">
+                    <input type="radio" id="rg_setup_yes" name="rg_setup" value="yes" onclick="showBillingType()">
+                    <label for="rg_setup_yes">Yes</label>
+                    <input type="radio" id="rg_setup_no" name="rg_setup" value="no" onclick="hideBillingType()">
+                    <label for="rg_setup_no">No</label>
+                </div>
+            </div>
+        </div>
+        <div id="billing_type" style="display:none;">
+            <div class="radio-group">
+                <label>Is your billing centralized or localized?</label>
+                <div class="radio-buttons">
+                    <input type="radio" id="billing_centralized" name="billing" value="centralized" onclick="showCentralizedMessage()">
+                    <label for="billing_centralized">Centralized</label>
+                    <input type="radio" id="billing_localized" name="billing" value="localized" onclick="showLocalizedMessage()">
+                    <label for="billing_localized">Localized</label>
+                </div>
+            </div>
+            <div id="centralized_message" style="display:none; color:green;">
+                By selecting this field RG will set up your location as a sub-account and send invoices to your parent company
+            </div>
+            <div id="localized_message" style="display:none; color:red;">
+                In the primary information below please provide information relevant to your specific location
+            </div>
         </div>
 
         <div class="radio-group">
@@ -803,47 +859,6 @@
         </div>
         <div id="other_pricing" style="display:none;">
             <input type="text" name="other_pricing" maxlength="20" aria-label="Custom Pricing Structure">
-        </div>
-
-        <div class="radio-group">
-            <label>Are you a part of a multi-location entity?</label>
-            <div class="radio-buttons">
-                <input type="radio" id="multi_location_yes" name="multi_location" value="yes" onclick="showNetworkSetup()"> 
-                <label for="multi_location_yes">Yes</label>
-                <input type="radio" id="multi_location_no" name="multi_location" value="no" onclick="hideNetworkSetup()"> 
-                <label for="multi_location_no">No</label>
-            </div>
-        </div>
-        <div id="multi_location_message" style="display:none; color:green;">
-            Please add additional locations below to provide each location's shipping information
-        </div>
-        <div id="network_setup" style="display:none;">
-            <div class="radio-group">
-                <label>Is your network already set up with RG?</label>
-                <div class="radio-buttons">
-                    <input type="radio" id="rg_setup_yes" name="rg_setup" value="yes" onclick="showBillingType()"> 
-                    <label for="rg_setup_yes">Yes</label>
-                    <input type="radio" id="rg_setup_no" name="rg_setup" value="no" onclick="hideBillingType()"> 
-                    <label for="rg_setup_no">No</label>
-                </div>
-            </div>
-        </div>
-        <div id="billing_type" style="display:none;">
-            <div class="radio-group">
-                <label>Is your billing centralized or localized?</label>
-                <div class="radio-buttons">
-                    <input type="radio" id="billing_centralized" name="billing" value="centralized" onclick="showCentralizedMessage()"> 
-                    <label for="billing_centralized">Centralized</label>
-                    <input type="radio" id="billing_localized" name="billing" value="localized" onclick="showLocalizedMessage()"> 
-                    <label for="billing_localized">Localized</label>
-                </div>
-            </div>
-            <div id="centralized_message" style="display:none; color:green;">
-                By selecting this field RG will set up your location as a sub-account and send invoices to your parent company
-            </div>
-            <div id="localized_message" style="display:none; color:red;">
-                In the primary information below please provide information relevant to your specific location
-            </div>
         </div>
 
         <div id="single_billing" class="radio-group" style="display:none;">
