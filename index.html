@@ -319,7 +319,7 @@
                             <input type="text" name="purchasing_last[]" placeholder="Last Name" aria-label="Purchasing Contact Last Name">
                         </div>
                         <div class="row">
-                            <input type="email" name="purchasing_email[]" placeholder="Email" pattern="[^@\\s]+@[^@\\s]+\\.[^@\\s]+" aria-label="Purchasing Contact Email">
+                            <input type="text" name="purchasing_email[]" placeholder="Email" required aria-label="Purchasing Contact Email">
                             <input type="tel" name="purchasing_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Purchasing Contact Phone">
                         </div>
                     </div>
@@ -339,7 +339,7 @@
                             <input type="text" name="warehouse_last[]" placeholder="Last Name" aria-label="Warehouse Contact Last Name">
                         </div>
                         <div class="row">
-                            <input type="email" name="warehouse_email[]" placeholder="Email" pattern="[^@\\s]+@[^@\\s]+\\.[^@\\s]+" aria-label="Warehouse Contact Email">
+                            <input type="email" name="warehouse_email[]" placeholder="Email" aria-label="Warehouse Contact Email">
                             <input type="tel" name="warehouse_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Warehouse Contact Phone">
                         </div>
                     </div>
@@ -401,6 +401,20 @@
             newLoc.appendChild(removeBtn);
             locations.appendChild(newLoc);
             updateAccountsPayableVisibility();
+            // Reattach blur event listeners to new email inputs
+            newLoc.querySelectorAll('input[type="email"]').forEach(input => {
+                input.addEventListener('blur', () => {
+                    input.value = input.value.trim();
+                    console.log(`Trimmed email input ${input.getAttribute('aria-label')}: "${input.value}"`);
+                });
+            });
+            // Reattach blur event listener to purchasing_email[] (type="text")
+            newLoc.querySelectorAll('input[name="purchasing_email[]"]').forEach(input => {
+                input.addEventListener('blur', () => {
+                    input.value = input.value.trim();
+                    console.log(`Trimmed purchasing email input ${input.getAttribute('aria-label')}: "${input.value}"`);
+                });
+            });
         }
         function removeLocation(button) {
             var locations = document.getElementById('locations');
@@ -417,13 +431,13 @@
                 var inputs = locations[i].querySelectorAll('input');
                 for (var j = 0; j < inputs.length; j++) {
                     if (inputs[j].type === 'radio') {
-                        inputs[i].name = inputs[i].name.replace(/\[\d+\]/, `[${i}]`);
-                        inputs[i].id = inputs[i].id.replace(/_\d+/, `_${i}`);
+                        inputs[j].name = inputs[j].name.replace(/\[\d+\]/, `[${i}]`);
+                        inputs[j].id = inputs[j].id.replace(/_\d+/, `_${i}`);
                     }
-                    if (inputs[i].name.startsWith('delivery_hours')) {
-                        inputs[i].id = `delivery_hours_${i}`;
-                        inputs[i].setAttribute('aria-label', 'Dock Availability');
-                        inputs[i].placeholder = 'Hours & Days';
+                    if (inputs[j].name.startsWith('delivery_hours')) {
+                        inputs[j].id = `delivery_hours_${i}`;
+                        inputs[j].setAttribute('aria-label', 'Dock Availability');
+                        inputs[j].placeholder = 'Hours & Days';
                     }
                 }
                 var label = locations[i].querySelector('label[for^="delivery_hours"]');
@@ -623,6 +637,8 @@
             });
 
             emailInputs.forEach(input => {
+                // Skip purchasing_email[] fields, as they are now type="text"
+                if (input.name === 'purchasing_email[]') return;
                 const value = input.value.trim();
                 if (value && !emailRegex.test(value)) {
                     isValid = false;
@@ -632,7 +648,7 @@
                     errorMsg.className = 'form-error';
                     errorMsg.textContent = `${input.getAttribute('aria-label')} must be a valid email address.`;
                     input.parentNode.appendChild(errorMsg);
-                    console.log(`Validation failed: ${input.getAttribute('aria-label')} has invalid format: ${value}`);
+                    console.log(`Validation failed: ${input.getAttribute('aria-label')} has invalid format: "${value}"`);
                 }
             });
 
@@ -675,6 +691,14 @@
             let isDrawing = false;
             let lastX = 0;
             let lastY = 0;
+
+            // Add blur event listeners to trim inputs
+            document.querySelectorAll('input[type="email"], input[name="purchasing_email[]"]').forEach(input => {
+                input.addEventListener('blur', () => {
+                    input.value = input.value.trim();
+                    console.log(`Trimmed input ${input.getAttribute('aria-label')}: "${input.value}"`);
+                });
+            });
 
             if (isMobile) {
                 signaturePad.style.display = 'none';
@@ -862,7 +886,6 @@
                     });
                 }, passive: false });
                 mobileSignaturePad.addEventListener('touchend', { handleEvent: (e) => {
-                    e.preventDefault();
                     isDrawing = false;
                     try {
                         const signatureData = mobileSignaturePad.toDataURL('image/jpeg', 0.5);
@@ -873,7 +896,6 @@
                     }
                 }, passive: false });
                 mobileSignaturePad.addEventListener('touchcancel', { handleEvent: (e) => {
-                    e.preventDefault();
                     isDrawing = false;
                     console.log('Mobile touchcancel');
                 }, passive: false });
@@ -1315,7 +1337,7 @@
                         <input type="text" name="purchasing_last[]" placeholder="Last Name" required aria-label="Purchasing Contact Last Name">
                     </div>
                     <div class="row">
-                        <input type="email" name="purchasing_email[]" placeholder="Email" pattern="[^@\\s]+@[^@\\s]+\\.[^@\\s]+" required aria-label="Purchasing Contact Email">
+                        <input type="text" name="purchasing_email[]" placeholder="Email" required aria-label="Purchasing Contact Email">
                         <input type="tel" name="purchasing_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Purchasing Contact Phone">
                     </div>
                 </div>
@@ -1335,7 +1357,7 @@
                         <input type="text" name="ap_last[]" placeholder="Last Name" aria-label="Accounts Payable Last Name">
                     </div>
                     <div class="row">
-                        <input type="email" name="ap_email[]" placeholder="Email" pattern="[^@\\s]+@[^@\\s]+\\.[^@\\s]+" aria-label="Accounts Payable Email">
+                        <input type="email" name="ap_email[]" placeholder="Email" aria-label="Accounts Payable Email">
                         <input type="tel" name="ap_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" aria-label="Accounts Payable Phone">
                     </div>
                 </div>
@@ -1355,7 +1377,7 @@
                         <input type="text" name="warehouse_last[]" placeholder="Last Name" required aria-label="Warehouse Contact Last Name">
                     </div>
                     <div class="row">
-                        <input type="email" name="warehouse_email[]" placeholder="Email" pattern="[^@\\s]+@[^@\\s]+\\.[^@\\s]+" required aria-label="Warehouse Contact Email">
+                        <input type="email" name="warehouse_email[]" placeholder="Email" required aria-label="Warehouse Contact Email">
                         <input type="tel" name="warehouse_phone[]" placeholder="Phone Number" pattern="[0-9]{10,}" required aria-label="Warehouse Contact Phone">
                     </div>
                 </div>
