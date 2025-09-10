@@ -136,7 +136,10 @@
             max-width: 400px;
             height: 150px;
             display: block;
-            cursor: crosshair;
+            touch-action: none; /* Prevent browser touch actions like zooming */
+        }
+        #mobile-signature {
+            display: none;
         }
         #signature-section {
             margin-top: 20px;
@@ -203,6 +206,18 @@
         .accounts-payable.hidden {
             display: none;
         }
+        .signature-feedback, .form-error {
+            color: #ff5555;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+        .form-success {
+            color: #00ff00;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
         /* Improved Mobile Responsiveness */
         @media (max-width: 600px) {
             form {
@@ -215,8 +230,16 @@
             }
             #signature-pad {
                 width: 100%;
-                max-width: 300px;
-                height: 100px;
+                max-width: 280px; /* Slightly smaller for better touch precision */
+                height: 120px; /* Adjusted for mobile */
+            }
+            #mobile-signature {
+                width: 100%;
+                max-width: 280px;
+                padding: 5px;
+                color: white;
+                background-color: #444;
+                border: 1px solid #666;
             }
             #customer_name {
                 max-width: 300px;
@@ -480,8 +503,77 @@
                 w9Message.style.display = 'none';
             }
         }
-        window.onload = function() {
+
+        // Validate form fields
+        function validateForm() {
+            const form = document.querySelector('form');
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+
+            // Clear previous error messages
+            document.querySelectorAll('.form-error').forEach(el => el.remove());
+
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.classList.add('error');
+                    input.setAttribute('aria-invalid', 'true');
+                    const errorMsg = document.createElement('span');
+                    errorMsg.className = 'form-error';
+                    errorMsg.textContent = `${input.getAttribute('aria-label')} is required.`;
+                    input.parentNode.appendChild(errorMsg);
+                } else {
+                    input.classList.remove('error');
+                    input.setAttribute('aria-invalid', 'false');
+                }
+            });
+
+            // Validate signature (canvas or mobile input)
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             const canvas = document.getElementById('signature-pad');
+            const mobileSignature = document.getElementById('mobile-signature');
+            if (isMobile && mobileSignature && mobileSignature.value.trim()) {
+                // Use mobile signature input if filled
+                document.getElementById('signature-data').value = mobileSignature.value;
+            } else {
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                const isCanvasEmpty = imageData.every((val, index) => index % 4 === 3 ? val === 255 : val === 0);
+                if (isCanvasEmpty) {
+                    isValid = false;
+                    const signatureError = document.createElement('span');
+                    signatureError.className = 'form-error signature-feedback';
+                    signatureError.textContent = 'Please provide a signature.';
+                    signatureError.setAttribute('role', 'alert');
+                    const signatureSection = document.getElementById('signature-section');
+                    if (!signatureSection.querySelector('.signature-feedback')) {
+                        signatureSection.appendChild(signatureError);
+                        setTimeout(() => signatureError.remove(), 3000);
+                    }
+                } else {
+                    document.getElementById('signature-data').value = canvas.toDataURL('image/png');
+                }
+            }
+
+            return isValid;
+        }
+
+        window.onload = function() {
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            const canvas = document.getElementById('signature-pad');
+            const mobileSignature = document.getElementById('mobile-signature');
+            const signatureSection = document.getElementById('signature-section');
+
+            // Show/hide canvas vs mobile signature input
+            if (isMobile) {
+                canvas.style.display = 'none';
+                mobileSignature.style.display = 'block';
+                mobileSignature.setAttribute('aria-label', 'Type your signature or upload a signature image');
+            } else {
+                canvas.style.display = 'block';
+                mobileSignature.style.display = 'none';
+            }
+
             const ctx = canvas.getContext('2d');
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
@@ -489,14 +581,12 @@
             let lastX = 0;
             let lastY = 0;
 
-            // Throttle function to optimize resize performance
-            function throttle(fn, wait) {
-                let lastCall = 0;
+            // Debounce function for resize (better for orientation changes)
+            function debounce(fn, wait) {
+                let timeout;
                 return function (...args) {
-                    const now = new Date().getTime();
-                    if (now - lastCall < wait) return;
-                    lastCall = now;
-                    return fn(...args);
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => fn(...args), wait);
                 };
             }
 
@@ -516,15 +606,14 @@
             canvas.setAttribute('tabindex', '0');
             canvas.setAttribute('aria-label', 'Draw your signature here');
             canvas.setAttribute('role', 'application');
+            canvas.setAttribute('aria-describedby', 'signature-instructions');
             canvas.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     const feedback = document.createElement('span');
                     feedback.className = 'signature-feedback';
                     feedback.textContent = 'Please use a mouse or touch to draw your signature.';
                     feedback.style.color = '#ff5555';
-                    feedback.style.fontSize = '14px';
                     feedback.setAttribute('role', 'alert');
-                    const signatureSection = document.getElementById('signature-section');
                     if (!signatureSection.querySelector('.signature-feedback')) {
                         signatureSection.appendChild(feedback);
                         setTimeout(() => feedback.remove(), 3000);
@@ -532,20 +621,26 @@
                 }
             });
 
-            window.addEventListener('resize', throttle(resizeCanvas, 100));
+            window.addEventListener('resize', debounce(resizeCanvas, 100));
             resizeCanvas();
 
             canvas.addEventListener('mousedown', (e) => {
                 isDrawing = true;
-                [lastX, lastY] = [e.offsetX, e.offsetY];
+                const rect = canvas.getBoundingClientRect();
+                lastX = e.clientX - rect.left;
+                lastY = e.clientY - rect.top;
             });
             canvas.addEventListener('mousemove', (e) => {
                 if (isDrawing) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
                     ctx.beginPath();
                     ctx.moveTo(lastX, lastY);
-                    ctx.lineTo(e.offsetX, e.offsetY);
+                    ctx.lineTo(x, y);
                     ctx.stroke();
-                    [lastX, lastY] = [e.offsetX, e.offsetY];
+                    lastX = x;
+                    lastY = y;
                 }
             });
             canvas.addEventListener('mouseup', () => isDrawing = false);
@@ -555,60 +650,86 @@
                 const touch = e.touches[0];
                 const rect = canvas.getBoundingClientRect();
                 isDrawing = true;
-                [lastX, lastY] = [(touch.clientX - rect.left) * (canvas.width / rect.width), (touch.clientY - rect.top) * (canvas.height / rect.height)];
+                lastX = (touch.clientX - rect.left - window.scrollX) * (canvas.width / rect.width);
+                lastY = (touch.clientY - rect.top - window.scrollY) * (canvas.height / rect.height);
             });
             canvas.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 if (isDrawing) {
                     const touch = e.touches[0];
                     const rect = canvas.getBoundingClientRect();
-                    const x = (touch.clientX - rect.left) * (canvas.width / rect.width);
-                    const y = (touch.clientY - rect.top) * (canvas.height / rect.height);
+                    const x = (touch.clientX - rect.left - window.scrollX) * (canvas.width / rect.width);
+                    const y = (touch.clientY - rect.top - window.scrollY) * (canvas.height / rect.height);
                     ctx.beginPath();
                     ctx.moveTo(lastX, lastY);
                     ctx.lineTo(x, y);
                     ctx.stroke();
-                    [lastX, lastY] = [x, y];
+                    lastX = x;
+                    lastY = y;
                 }
             });
-            canvas.addEventListener('touchend', () => isDrawing = false);
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDrawing = false;
+            });
+            canvas.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                isDrawing = false;
+            });
 
             document.getElementById('clear-signature').addEventListener('click', () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 document.getElementById('signature-data').value = '';
+                mobileSignature.value = '';
                 ctx.strokeStyle = '#ffffff';
                 const feedback = document.createElement('span');
-                feedback.className = 'signature-feedback';
+                feedback.className = 'form-success signature-feedback';
                 feedback.textContent = 'Signature cleared.';
-                feedback.style.color = '#00ff00';
-                feedback.style.fontSize = '14px';
                 feedback.setAttribute('role', 'status');
-                const signatureSection = document.getElementById('signature-section');
                 if (!signatureSection.querySelector('.signature-feedback')) {
                     signatureSection.appendChild(feedback);
                     setTimeout(() => feedback.remove(), 2000);
                 }
             });
 
-            document.querySelector('form').addEventListener('submit', (e) => {
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-                const isCanvasEmpty = imageData.every((val, index) => index % 4 === 3 ? val === 255 : val === 0);
-                if (isCanvasEmpty) {
-                    e.preventDefault();
-                    const feedback = document.createElement('span');
-                    feedback.className = 'signature-feedback';
-                    feedback.textContent = 'Please provide a signature.';
-                    feedback.style.color = '#ff5555';
-                    feedback.style.fontSize = '14px';
-                    feedback.setAttribute('role', 'alert');
-                    const signatureSection = document.getElementById('signature-section');
-                    if (!signatureSection.querySelector('.signature-feedback')) {
-                        signatureSection.appendChild(feedback);
-                        setTimeout(() => feedback.remove(), 3000);
-                    }
+            // Improved Form Submission
+            document.querySelector('form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!validateForm()) {
                     return;
                 }
-                document.getElementById('signature-data').value = canvas.toDataURL('image/png');
+
+                const form = document.querySelector('form');
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch(form.getAttribute('action') || '/.netlify/functions/submit-form', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const successMsg = document.createElement('span');
+                        successMsg.className = 'form-success';
+                        successMsg.textContent = 'Form submitted successfully!';
+                        successMsg.setAttribute('role', 'status');
+                        form.appendChild(successMsg);
+                        setTimeout(() => successMsg.remove(), 3000);
+                        form.reset();
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        mobileSignature.value = '';
+                        document.getElementById('signature-data').value = '';
+                    } else {
+                        throw new Error('Submission failed');
+                    }
+                } catch (error) {
+                    const errorMsg = document.createElement('span');
+                    errorMsg.className = 'form-error';
+                    errorMsg.textContent = 'Error submitting form. Please try again.';
+                    errorMsg.setAttribute('role', 'alert');
+                    form.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 3000);
+                }
             });
 
             document.getElementById('tax_exempt_yes').addEventListener('change', () => {
@@ -671,10 +792,20 @@
             }
             const locations = document.getElementById('locations').getElementsByClassName('location').length;
             data['num_locations'] = locations;
-            const canvas = document.getElementById('signature-pad');
-            data['signature'] = canvas.toDataURL('image/png');
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (!isMobile) {
+                const canvas = document.getElementById('signature-pad');
+                data['signature'] = canvas.toDataURL('image/png');
+            } else {
+                data['signature'] = document.getElementById('mobile-signature').value;
+            }
             localStorage.setItem('customerIntakeForm', JSON.stringify(data));
-            alert('Form saved!');
+            const feedback = document.createElement('span');
+            feedback.className = 'form-success';
+            feedback.textContent = 'Form saved!';
+            feedback.setAttribute('role', 'status');
+            form.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 2000);
         }
         function loadForm() {
             const saved = localStorage.getItem('customerIntakeForm');
@@ -714,13 +845,18 @@
             }
             updateSingleBillingVisibility();
             showSingleBillingMessage();
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             if (data['signature']) {
-                const ctx = document.getElementById('signature-pad').getContext('2d');
-                const img = new Image();
-                img.src = data['signature'];
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
-                };
+                if (!isMobile) {
+                    const ctx = document.getElementById('signature-pad').getContext('2d');
+                    const img = new Image();
+                    img.src = data['signature'];
+                    img.onload = () => {
+                        ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
+                    };
+                } else {
+                    document.getElementById('mobile-signature').value = data['signature'];
+                }
             }
             updateAccountsPayableVisibility();
             updateW9Display();
@@ -743,16 +879,22 @@
             document.getElementById('single_billing_message').style.display = 'none';
             document.getElementById('multi_location_message').style.display = 'none';
             const ctx = document.getElementById('signature-pad').getContext('2d');
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            ctx.clearRect(0, 0, ctx.canvas.width, canvas.height);
             ctx.strokeStyle = '#ffffff';
-            alert('Form cleared!');
+            document.getElementById('mobile-signature').value = '';
+            const feedback = document.createElement('span');
+            feedback.className = 'form-success';
+            feedback.textContent = 'Form cleared!';
+            feedback.setAttribute('role', 'status');
+            document.querySelector('form').appendChild(feedback);
+            setTimeout(() => feedback.remove(), 2000);
             updateAccountsPayableVisibility();
             updateW9Display();
         }
     </script>
 </head>
 <body>
-    <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+    <form name="customer-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/.netlify/functions/submit-form">
         <input type="hidden" name="form-name" value="customer-intake">
         <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
         <div class="logo-container">
@@ -999,7 +1141,11 @@
         <div id="signature-section">
             <div class="signature-container">
                 <label for="signature-pad">Signature (Required):</label>
+                <div id="signature-instructions" style="color: #ccc; font-size: 12px; margin-bottom: 5px;">
+                    On desktop, use your mouse to draw your signature. On mobile, type your name or upload a signature image.
+                </div>
                 <canvas id="signature-pad" width="400" height="150" aria-label="Draw your signature here"></canvas>
+                <input type="text" id="mobile-signature" name="mobile-signature" placeholder="Type your signature" style="display: none;" aria-label="Type your signature or upload a signature image">
                 <input type="hidden" id="signature-data" name="signature" value="">
                 <button type="button" id="clear-signature">Clear Signature</button>
             </div>
