@@ -352,13 +352,13 @@
                             <input type="tel" name="purchasing_phone[]" placeholder="Phone Number" pattern="^(\\([0-9]{3}\\)\\s?|[0-9]{3}-?)[0-9]{3}-?[0-9]{4}$" aria-label="Purchasing Contact Phone">
                         </div>
                     </div>
-                    <div class="billing-address">
-                        <label>Billing Address:</label>
+                    <div>
+                        <label>Ship to Address:</label>
                         <div class="row">
-                            <input type="text" name="billing_street[]" placeholder="Street" aria-label="Billing Street">
-                            <input type="text" name="billing_city[]" placeholder="City" aria-label="Billing City">
-                            <input type="text" name="billing_state[]" placeholder="State" aria-label="Billing State">
-                            <input type="text" name="billing_zip[]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" aria-label="Billing Zip Code">
+                            <input type="text" name="ship_street[]" placeholder="Street" required aria-label="Shipping Street">
+                            <input type="text" name="ship_city[]" placeholder="City" required aria-label="Shipping City">
+                            <input type="text" name="ship_state[]" placeholder="State" required aria-label="Shipping State">
+                            <input type="text" name="ship_zip[]" placeholder="Zip Code" pattern="[0-9]{5}(-[0-9]{4})?" required aria-label="Shipping Zip Code">
                         </div>
                     </div>
                     <div>
@@ -451,7 +451,7 @@
             for (var i = 0; i < locations.length; i++) {
                 locations[i].querySelector('h2').textContent = (i === 0 ? 'Primary' : (i + 1)) + ' Information';
                 var inputs = locations[i].querySelectorAll('input');
-                for (var j = 0; j < inputs.length; j++) {
+                for (var j = 0; j < inputs.length; i++) {
                     if (inputs[j].type === 'radio') {
                         inputs[j].name = inputs[j].name.replace(/\[\d+\]/, `[${i}]`);
                         inputs[j].id = inputs[j].id.replace(/_\d+/, `_${i}`);
@@ -1342,7 +1342,6 @@
         </div>
         <div id="gpo_options" style="display:none;">
             <select name="gpo_type" aria-label="GPO Type">
-                <option value="">Select</option>
                 <option>Premier</option>
                 <option>Vizient</option>
                 <option>VA</option>
@@ -1361,7 +1360,6 @@
         </div>
         <div id="dist_options" style="display:none;">
             <select name="dist_type" aria-label="Distributor Type">
-                <option value="">Select</option>
                 <option>US Foods</option>
                 <option>Sysco</option>
                 <option>GFS</option>
@@ -1374,7 +1372,6 @@
             <label for="pricing">What pricing structure is this customer?</label>
             <div class="dropdown-field">
                 <select id="pricing" name="pricing" onchange="checkOther(this)" aria-label="Pricing Structure">
-                    <option value="">Select</option>
                     <option>Frontline</option>
                     <option>GPO</option>
                     <option>WS</option>
